@@ -4,11 +4,11 @@
 function getUsers()
 {
     $pdo = pdoSqlConnect();
-    $query = "select * from Users;";
+    $query = "select * from user;";
 
     $st = $pdo->prepare($query);
     //    $st->execute([$param,$param]);
-    $st->execute([]);
+    $st->execute();
     $st->setFetchMode(PDO::FETCH_ASSOC);
     $res = $st->fetchAll();
 
@@ -66,6 +66,51 @@ function createUser($ID, $pwd, $name)
     $st = null;
     $pdo = null;
 
+}
+
+function addNaverUser($naverId,$email,$name,$profileImg) {
+    $pdo = pdoSqlConnect();
+    $query = "INSERT INTO user (naverId,email,naverName,naverProfile) VALUES (?,?,?,?);";
+
+    $st = $pdo->prepare($query);
+    $st->execute([$naverId,$email,$name,$profileImg]);
+
+    $st = null;
+    $pdo = null;
+
+}
+
+function checkNaverUser($naverId, $email) {
+    $pdo = pdoSqlConnect();
+    $query = "select exists(select naverId,email from user where naverId = ? and email = ?) as exist;";
+
+    $st = $pdo->prepare($query);
+    $st->execute([$naverId,$email]);
+    //    $st->execute();
+    $st->setFetchMode(PDO::FETCH_ASSOC);
+    $res = $st->fetchAll();
+
+    $st = null;
+    $pdo = null;
+
+    return $res[0]['exist'];
+}
+
+function getIdxNaverId($naverId)
+{
+    $pdo = pdoSqlConnect();
+    $query = "select idx from user where naverId = ?;";
+
+    $st = $pdo->prepare($query);
+    $st->execute([$naverId]);
+    //    $st->execute();
+    $st->setFetchMode(PDO::FETCH_ASSOC);
+    $res = $st->fetchAll();
+
+    $st = null;
+    $pdo = null;
+
+    return $res[0]['idx'];
 }
 
 

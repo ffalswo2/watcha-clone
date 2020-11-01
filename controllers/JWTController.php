@@ -67,6 +67,79 @@ try {
             echo json_encode($res, JSON_NUMERIC_CHECK);
             break;
 
+        case "naverLogin":
+            http_response_code(200);
+
+            if (!isset($req->accessToken) or empty($req->accessToken)==true) {
+                $res->isSuccess = FALSE;
+                $res->code = 222;
+                $res->message = "accessToken을 입력해주세요";
+                echo json_encode($res, JSON_NUMERIC_CHECK);
+                break;
+            }
+
+            $accessToken = $req->accessToken;
+
+            if (is_numeric($accessToken)) {
+                $res->isSuccess = FALSE;
+                $res->code = 211;
+                $res->message = "accessToken 타입이 틀립니다";
+                echo json_encode($res, JSON_NUMERIC_CHECK);
+                break;
+            }
+
+            $token = $accessToken;
+            $header = "Bearer ".$token; // Bearer 다음에 공백 추가
+            $url = "https://openapi.naver.com/v1/nid/me";
+            $is_post = false;
+            $ch = curl_init();
+            curl_setopt($ch, CURLOPT_URL, $url);
+            curl_setopt($ch, CURLOPT_POST, $is_post);
+            curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+            $headers = array();
+            $headers[] = "Authorization: ".$header;
+            curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
+            $response = curl_exec ($ch);
+            $status_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+//            echo "status_code:".$status_code."<br>";
+            curl_close ($ch);
+            if($status_code == 200) {
+                $profileResponse = json_decode($response);
+
+                $naverId = $profileResponse->response->id;
+                $profileImg = $profileResponse->response->profile_image;
+                $email = $profileResponse->response->email;
+                $name = $profileResponse->response->name;
+
+                // 1) 로그인 시 email, password 받기
+                if (!isValidNaverUser($naverId, $email)) { // JWTPdo.php 에 구현
+                    $res->isSuccess = FALSE;
+                    $res->code = 201;
+                    $res->message = "유효하지 않은 네이버 아이디 입니다";
+                    echo json_encode($res, JSON_NUMERIC_CHECK);
+                    return;
+                }
+
+                // 2) JWT 발급
+                // Payload에 맞게 다시 설정 요함, 아래는 Payload에 userIdx를 넣기 위한 과정
+                $userIdx = getUserIdxByNaverId($naverId);  // JWTPdo.php 에 구현
+//            $addressIdx = getAddrIdxByUserIdx($userIdx); // 내가 만듦
+                $jwt = getJWT($userIdx, JWT_SECRET_KEY); // function.php 에 구현
+
+                $res->result->jwt = $jwt;
+                $res->isSuccess = TRUE;
+                $res->code = 100;
+                $res->message = "네이버 로그인 성공(jwt 발급 성공)";
+                echo json_encode($res, JSON_NUMERIC_CHECK);
+                break;
+            } else {
+                echo "Error 내용:".$response;
+            }
+
+
+
+
+
 
     }
 } catch (\Exception $e) {

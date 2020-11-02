@@ -37,6 +37,7 @@ function getJWT($userIdx, $secretKey) {
 //    print_r($decoded);
 }
 
+
 // JWT 유효성 검사
 function isValidJWT($jwt, $key) {
     try {

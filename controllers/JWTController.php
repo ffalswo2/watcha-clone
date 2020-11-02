@@ -123,7 +123,7 @@ try {
                 // 2) JWT 발급
                 // Payload에 맞게 다시 설정 요함, 아래는 Payload에 userIdx를 넣기 위한 과정
                 $userIdx = getUserIdxByNaverId($naverId);  // JWTPdo.php 에 구현
-//            $addressIdx = getAddrIdxByUserIdx($userIdx); // 내가 만듦
+
                 $jwt = getJWT($userIdx, JWT_SECRET_KEY); // function.php 에 구현
 
                 $res->result->jwt = $jwt;

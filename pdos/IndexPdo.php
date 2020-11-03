@@ -385,6 +385,34 @@ function changeProfileName($profileName,$userIdxInToken) {
 
 }
 
+function rateWithStar($profileIdx,$videoIdx,$ratingStar) {
+    $pdo = pdoSqlConnect();
+    $query = "INSERT INTO rating (profileIdx,videoIdx,rating) VALUES (?,?,?);";
+
+    $st = $pdo->prepare($query);
+    $st->execute([$profileIdx,$videoIdx,$ratingStar]);
+
+    $st = null;
+    $pdo = null;
+
+}
+
+function checkUserAlreadyRate($profileIdx,$videoIdx) {
+    $pdo = pdoSqlConnect();
+    $query = "select exists(select profileIdx,videoIdx from rating where profileIdx = ? and videoIdx = ?) as exist;";
+
+    $st = $pdo->prepare($query);
+    $st->execute([$profileIdx,$videoIdx]);
+    //    $st->execute();
+    $st->setFetchMode(PDO::FETCH_ASSOC);
+    $res = $st->fetchAll();
+
+    $st = null;
+    $pdo = null;
+
+    return $res[0]['exist'];
+}
+
 
 // CREATE
 //    function addMaintenance($message){

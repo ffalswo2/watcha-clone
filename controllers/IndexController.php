@@ -139,6 +139,7 @@ try {
 
             $jwt = $_SERVER['HTTP_X_ACCESS_TOKEN'];
             $userIdxInToken = getDataByJWToken($jwt,JWT_SECRET_KEY)->userIdx;
+            $profileIdxInToken = getDataByJWToken($jwt,JWT_SECRET_KEY)->profileIdx;
 
             if (!isValidJWT($jwt,JWT_SECRET_KEY)) {
                 $res->isSuccess = FALSE;
@@ -149,41 +150,41 @@ try {
                 return;
             }
 
-            if (!isset($vars['profile-idx']) or empty($vars['profile-idx'])==true) {
-                $res->isSuccess = FALSE;
-                $res->code = 222;
-                $res->message = "profileIdx를 입력해주세요";
-                echo json_encode($res, JSON_NUMERIC_CHECK);
-                break;
-            }
+//            if (!isset($vars['profile-idx']) or empty($vars['profile-idx'])==true) {
+//                $res->isSuccess = FALSE;
+//                $res->code = 222;
+//                $res->message = "profileIdx를 입력해주세요";
+//                echo json_encode($res, JSON_NUMERIC_CHECK);
+//                break;
+//            }
+//
+//            $profileIdx = $vars['profile-idx'];
+//
+//            if (!is_numeric($profileIdx)) {
+//                $res->isSuccess = FALSE;
+//                $res->code = 211;
+//                $res->message = "profileIdx 타입이 틀립니다";
+//                echo json_encode($res, JSON_NUMERIC_CHECK);
+//                break;
+//            }
+//
+//            if (!checkUserIdProfileId($userIdxInToken,$profileIdx)) {
+//                $res->isSuccess = FALSE;
+//                $res->code = 208;
+//                $res->message = "다른 유저의 프로필입니다";
+//                echo json_encode($res, JSON_NUMERIC_CHECK);
+//                break;
+//            }
+//
+//            if (!isValidProfileIdx($profileIdx)) {
+//                $res->isSuccess = FALSE;
+//                $res->code = 200;
+//                $res->message = "유효하지 않은 프로필 idx입니다.";
+//                echo json_encode($res, JSON_NUMERIC_CHECK);
+//                break;
+//            }
 
-            $profileIdx = $vars['profile-idx'];
-
-            if (!is_numeric($profileIdx)) {
-                $res->isSuccess = FALSE;
-                $res->code = 211;
-                $res->message = "profileIdx 타입이 틀립니다";
-                echo json_encode($res, JSON_NUMERIC_CHECK);
-                break;
-            }
-
-            if (!checkUserIdProfileId($userIdxInToken,$profileIdx)) {
-                $res->isSuccess = FALSE;
-                $res->code = 208;
-                $res->message = "다른 유저의 프로필입니다";
-                echo json_encode($res, JSON_NUMERIC_CHECK);
-                break;
-            }
-
-            if (!isValidProfileIdx($profileIdx)) {
-                $res->isSuccess = FALSE;
-                $res->code = 200;
-                $res->message = "유효하지 않은 프로필 idx입니다.";
-                echo json_encode($res, JSON_NUMERIC_CHECK);
-                break;
-            }
-
-            $videos = getVideos($profileIdx);
+            $videos = getVideos($profileIdxInToken);
 
             $ratingNum = $videos[0]['ratingNum'];
             $resArr = [];
@@ -239,6 +240,7 @@ try {
 
             $jwt = $_SERVER['HTTP_X_ACCESS_TOKEN'];
             $userIdxInToken = getDataByJWToken($jwt,JWT_SECRET_KEY)->userIdx;
+            $profileIdxInToken = getDataByJWToken($jwt,JWT_SECRET_KEY)->profileIdx;
 
             if (!isValidJWT($jwt,JWT_SECRET_KEY)) {
                 $res->isSuccess = FALSE;
@@ -247,40 +249,6 @@ try {
                 echo json_encode($res, JSON_NUMERIC_CHECK);
                 addErrorLogs($errorLogs, $res, $req);
                 return;
-            }
-
-            if (!isset($vars['profile-idx']) or empty($vars['profile-idx'])==true) {
-                $res->isSuccess = FALSE;
-                $res->code = 222;
-                $res->message = "profileIdx를 입력해주세요";
-                echo json_encode($res, JSON_NUMERIC_CHECK);
-                break;
-            }
-
-            $profileIdx = $vars['profile-idx'];
-
-            if (!is_numeric($profileIdx)) {
-                $res->isSuccess = FALSE;
-                $res->code = 211;
-                $res->message = "profileIdx 타입이 틀립니다";
-                echo json_encode($res, JSON_NUMERIC_CHECK);
-                break;
-            }
-
-            if (!isValidProfileIdx($profileIdx)) {
-                $res->isSuccess = FALSE;
-                $res->code = 200;
-                $res->message = "유효하지 않은 프로필 idx입니다.";
-                echo json_encode($res, JSON_NUMERIC_CHECK);
-                break;
-            }
-
-            if (!checkUserIdProfileId($userIdxInToken,$profileIdx)) {
-                $res->isSuccess = FALSE;
-                $res->code = 208;
-                $res->message = "다른 유저의 프로필입니다";
-                echo json_encode($res, JSON_NUMERIC_CHECK);
-                break;
             }
 
             if (!isset($vars['video-idx']) or empty($vars['video-idx'])==true) {
@@ -293,7 +261,7 @@ try {
 
             $videoIdx = $vars['video-idx'];
 
-            if (!is_numeric($profileIdx)) {
+            if (!is_numeric($videoIdx)) {
                 $res->isSuccess = FALSE;
                 $res->code = 213;
                 $res->message = "videoIdx 타입이 틀립니다";
@@ -309,8 +277,8 @@ try {
                 break;
             }
 
-            if (checkHateStatus($profileIdx,$videoIdx)=='D') { // status 확인
-                changeHateToNothing($profileIdx,$videoIdx); // 'N'으로 바꾸기
+            if (checkHateStatus($profileIdxInToken,$videoIdx)=='D') { // status 확인
+                changeHateToNothing($profileIdxInToken,$videoIdx); // 'N'으로 바꾸기
                 $res->isSuccess = TRUE;
                 $res->code = 411;
                 $res->message = "해당 영상 관심없습니다 취소";
@@ -318,8 +286,8 @@ try {
                 break;
             }
 
-            if (checkHateStatus($profileIdx,$videoIdx)=='L') { // status 확인
-                changeNothingToHate($profileIdx,$videoIdx); // 'D'으로 바꾸기
+            if (checkHateStatus($profileIdxInToken,$videoIdx)=='L') { // status 확인
+                changeNothingToHate($profileIdxInToken,$videoIdx); // 'D'으로 바꾸기
                 $res->isSuccess = TRUE;
                 $res->code = 411;
                 $res->message = "해당 영상 관심없습니다 취소";
@@ -327,8 +295,8 @@ try {
                 break;
             }
 
-            if (checkHateStatus($profileIdx,$videoIdx)=='N') { // status 확인
-                changeNothingToHate($profileIdx,$videoIdx); // 'D'으로 바꾸기
+            if (checkHateStatus($profileIdxInToken,$videoIdx)=='N') { // status 확인
+                changeNothingToHate($profileIdxInToken,$videoIdx); // 'D'으로 바꾸기
                 $res->isSuccess = TRUE;
                 $res->code = 100;
                 $res->message = "해당 영상 관심없습니다 성공";
@@ -337,7 +305,7 @@ try {
             }
 
 
-            banVideo($profileIdx,$videoIdx); // default D 로 insert
+            banVideo($profileIdxInToken,$videoIdx); // default D 로 insert
             $res->isSuccess = TRUE;
             $res->code = 100;
             $res->message = "해당 영상 관심없습니다 성공";
@@ -349,6 +317,7 @@ try {
 
             $jwt = $_SERVER['HTTP_X_ACCESS_TOKEN'];
             $userIdxInToken = getDataByJWToken($jwt,JWT_SECRET_KEY)->userIdx;
+            $profileIdxInToken = getDataByJWToken($jwt,JWT_SECRET_KEY)->profileIdx;
 
             if (!isValidJWT($jwt,JWT_SECRET_KEY)) {
                 $res->isSuccess = FALSE;
@@ -357,40 +326,6 @@ try {
                 echo json_encode($res, JSON_NUMERIC_CHECK);
                 addErrorLogs($errorLogs, $res, $req);
                 return;
-            }
-
-            if (!isset($vars['profile-idx']) or empty($vars['profile-idx'])==true) {
-                $res->isSuccess = FALSE;
-                $res->code = 222;
-                $res->message = "profileIdx를 입력해주세요";
-                echo json_encode($res, JSON_NUMERIC_CHECK);
-                break;
-            }
-
-            $profileIdx = $vars['profile-idx'];
-
-            if (!is_numeric($profileIdx)) {
-                $res->isSuccess = FALSE;
-                $res->code = 211;
-                $res->message = "profileIdx 타입이 틀립니다";
-                echo json_encode($res, JSON_NUMERIC_CHECK);
-                break;
-            }
-
-            if (!isValidProfileIdx($profileIdx)) {
-                $res->isSuccess = FALSE;
-                $res->code = 200;
-                $res->message = "유효하지 않은 프로필 idx입니다.";
-                echo json_encode($res, JSON_NUMERIC_CHECK);
-                break;
-            }
-
-            if (!checkUserIdProfileId($userIdxInToken,$profileIdx)) {
-                $res->isSuccess = FALSE;
-                $res->code = 208;
-                $res->message = "다른 유저의 프로필입니다";
-                echo json_encode($res, JSON_NUMERIC_CHECK);
-                break;
             }
 
             if (!isset($vars['video-idx']) or empty($vars['video-idx'])==true) {
@@ -403,7 +338,7 @@ try {
 
             $videoIdx = $vars['video-idx'];
 
-            if (!is_numeric($profileIdx)) {
+            if (!is_numeric($videoIdx)) {
                 $res->isSuccess = FALSE;
                 $res->code = 213;
                 $res->message = "videoIdx 타입이 틀립니다";
@@ -419,8 +354,8 @@ try {
                 break;
             }
 
-            if (checkHateStatus($profileIdx,$videoIdx)=='L') { // status 확인
-                changeHateToNothing($profileIdx,$videoIdx); // 'N'으로 바꾸기
+            if (checkHateStatus($profileIdxInToken,$videoIdx)=='L') { // status 확인
+                changeHateToNothing($profileIdxInToken,$videoIdx); // 'N'으로 바꾸기
                 $res->isSuccess = TRUE;
                 $res->code = 411;
                 $res->message = "해당 영상 보고싶어요 취소";
@@ -428,8 +363,8 @@ try {
                 break;
             }
 
-            if (checkHateStatus($profileIdx,$videoIdx)=='D') { // status 확인
-                changeNothingToLike($profileIdx,$videoIdx); // 'L'으로 바꾸기
+            if (checkHateStatus($profileIdxInToken,$videoIdx)=='D') { // status 확인
+                changeNothingToLike($profileIdxInToken,$videoIdx); // 'L'으로 바꾸기
                 $res->isSuccess = TRUE;
                 $res->code = 100;
                 $res->message = "해당 영상 보고싶어요 성공";
@@ -437,8 +372,8 @@ try {
                 break;
             }
 
-            if (checkHateStatus($profileIdx,$videoIdx)=='N') { // status 확인
-                changeNothingToLike($profileIdx,$videoIdx); // 'L'으로 바꾸기
+            if (checkHateStatus($profileIdxInToken,$videoIdx)=='N') { // status 확인
+                changeNothingToLike($profileIdxInToken,$videoIdx); // 'L'으로 바꾸기
                 $res->isSuccess = TRUE;
                 $res->code = 100;
                 $res->message = "해당 영상 보고싶어요 성공";
@@ -447,7 +382,7 @@ try {
             }
 
 
-            likeVideo($profileIdx,$videoIdx); // L 로 insert
+            likeVideo($profileIdxInToken,$videoIdx); // L 로 insert
             $res->isSuccess = TRUE;
             $res->code = 100;
             $res->message = "해당 영상 보고싶어요 성공";
@@ -533,6 +468,89 @@ try {
             $res->isSuccess = TRUE;
             $res->code = 100;
             $res->message = "유저 프로필 정보 수정 성공";
+            echo json_encode($res, JSON_NUMERIC_CHECK);
+            break;
+
+        case "rateWithStar":
+            http_response_code(200);
+
+            $jwt = $_SERVER['HTTP_X_ACCESS_TOKEN'];
+            $userIdxInToken = getDataByJWToken($jwt,JWT_SECRET_KEY)->userIdx;
+            $profileIdxInToken = getDataByJWToken($jwt,JWT_SECRET_KEY)->profileIdx;
+
+            if (!isValidJWT($jwt,JWT_SECRET_KEY)) {
+                $res->isSuccess = FALSE;
+                $res->code = 202;
+                $res->message = "유효하지 않은 토큰입니다";
+                echo json_encode($res, JSON_NUMERIC_CHECK);
+                addErrorLogs($errorLogs, $res, $req);
+                return;
+            }
+
+            if (!isset($vars['video-idx']) or empty($vars['video-idx'])==true) {
+                $res->isSuccess = FALSE;
+                $res->code = 221;
+                $res->message = "videoIdx를 입력해주세요";
+                echo json_encode($res, JSON_NUMERIC_CHECK);
+                break;
+            }
+
+            $videoIdx = $vars['video-idx'];
+
+            if (!is_numeric($videoIdx)) {
+                $res->isSuccess = FALSE;
+                $res->code = 213;
+                $res->message = "videoIdx 타입이 틀립니다";
+                echo json_encode($res, JSON_NUMERIC_CHECK);
+                break;
+            }
+
+            if (!isValidVideoIdx($videoIdx)) {
+                $res->isSuccess = FALSE;
+                $res->code = 223;
+                $res->message = "유효하지 않은 비디오 idx입니다";
+                echo json_encode($res, JSON_NUMERIC_CHECK);
+                break;
+            }
+
+            if (!isset($req->ratingStar) or empty($req->ratingStar)==true) {
+                $res->isSuccess = FALSE;
+                $res->code = 266;
+                $res->message = "별점 점수를 입력해주세요";
+                echo json_encode($res, JSON_NUMERIC_CHECK);
+                break;
+            }
+
+            $ratingStar = $req->ratingStar;
+
+            if (!is_numeric($ratingStar)) {
+                $res->isSuccess = FALSE;
+                $res->code = 216;
+                $res->message = "ratingStar 타입이 틀립니다";
+                echo json_encode($res, JSON_NUMERIC_CHECK);
+                break;
+            }
+
+            if ($ratingStar > 5) {
+                $res->isSuccess = FALSE;
+                $res->code = 250;
+                $res->message = "줄 수 있는 최대 별점은 5점입니다";
+                echo json_encode($res, JSON_NUMERIC_CHECK);
+                break;
+            }
+
+            if (checkUserAlreadyRate($profileIdxInToken,$videoIdx)) { // 평가한 영상은 또 평가할 수 없음
+                $res->isSuccess = FALSE;
+                $res->code = 300;
+                $res->message = "한번 평가한 영상은 더 이상 평가할 수 없습니다";
+                echo json_encode($res, JSON_NUMERIC_CHECK);
+                break;
+            }
+
+            rateWithStar($profileIdxInToken,$videoIdx,$ratingStar);
+            $res->isSuccess = TRUE;
+            $res->code = 100;
+            $res->message = "유저 별점 평가 성공";
             echo json_encode($res, JSON_NUMERIC_CHECK);
             break;
 

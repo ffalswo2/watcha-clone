@@ -31,6 +31,22 @@ function getUserIdxByNaverId($naverId)
     return $res[0]['idx'];
 }
 
+function getProfileIdxByUserIdx($userIdx)
+{
+    $pdo = pdoSqlConnect();
+    $query = "SELECT idx FROM profile WHERE userIdx = ?;";
+
+    $st = $pdo->prepare($query);
+    $st->execute([$userIdx]);
+    $st->setFetchMode(PDO::FETCH_ASSOC);
+    $res = $st->fetchAll();
+
+    $st = null;
+    $pdo = null;
+
+    return $res[0]['idx'];
+}
+
 function isValidNaverUser($naverId, $email){
     $pdo = pdoSqlConnect();
     $query = "select exists(select naverId,email from user where naverId = ? and email = ?) as exist;";

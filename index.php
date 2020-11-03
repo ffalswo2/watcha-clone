@@ -28,12 +28,12 @@ $dispatcher = FastRoute\simpleDispatcher(function (FastRoute\RouteCollector $r) 
 
     $r->addRoute('POST', '/naver/user', ['IndexController', 'naverSignUp']); // 네이버 회원가입
     $r->addRoute('POST', '/naver/login', ['JWTController', 'naverLogin']); // 네이버 로그인
-    $r->addRoute('GET', '/profile/{profile-idx}/videos', ['IndexController', 'getVideos']); // 유저 기반 모든 영상 조회 (평가하기)
+    $r->addRoute('GET', '/user/videos', ['IndexController', 'getVideos']); // 유저 기반 모든 영상 조회 (평가하기)
     $r->addRoute('GET', '/genre', ['IndexController', 'getGenreIdx']); // 장르 idx 조회
     $r->addRoute('GET', '/videos/category', ['IndexController', 'searchVidByCategory']); // 카테고리별로 영상 검색
-    $r->addRoute('PATCH', '/profile/{profile-idx}/no-video/{video-idx}', ['IndexController', 'banVideo']); // 특정 영상 관심없어요 추가/삭제
-    $r->addRoute('PATCH', '/profile/{profile-idx}/good-video/{video-idx}', ['IndexController', 'likeVideo']); // 특정 영상 보고싶어요 추가/삭제
-    $r->addRoute('POST', '/profile/{profile-idx}/rating-stars', ['IndexController', 'naverLogin']); // 별점 평가하기 미완
+    $r->addRoute('PATCH', '/user/no-video/{video-idx}', ['IndexController', 'banVideo']); // 특정 영상 관심없어요 추가/삭제
+    $r->addRoute('PATCH', '/user/good-video/{video-idx}', ['IndexController', 'likeVideo']); // 특정 영상 보고싶어요 추가/삭제
+    $r->addRoute('POST', '/user/rating-video/{video-idx}', ['IndexController', 'rateWithStar']); // 별점 평가하기
     $r->addRoute('GET', '/user/profile', ['IndexController', 'getProfile']); // 유저 프로필 조회
     $r->addRoute('PATCH', '/user/profile-info', ['IndexController', 'changeProfileInfo']); // 유저 프로필 이미지 수정
 

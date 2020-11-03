@@ -476,7 +476,7 @@ try {
             echo json_encode($res, JSON_NUMERIC_CHECK);
             break;
 
-        case "changeProfileImage":
+        case "changeProfileInfo":
             http_response_code(200);
 
             $jwt = $_SERVER['HTTP_X_ACCESS_TOKEN'];
@@ -491,79 +491,50 @@ try {
                 return;
             }
 
-            if (!isset($req->profileImage) or empty($req->profileImage)==true) {
-                $res->isSuccess = FALSE;
-                $res->code = 221;
-                $res->message = "이미지URL을 입력해주세요";
+//            if (!isset($req->profileImage) or empty($req->profileImage)==true) {
+//                $res->isSuccess = FALSE;
+//                $res->code = 221;
+//                $res->message = "이미지URL을 입력해주세요";
+//                echo json_encode($res, JSON_NUMERIC_CHECK);
+//                break;
+//            }
+
+            $profileImage = $req->profileImage;
+            $profileName = $req->profileName;
+
+            if (!isset($profileImage)) {
+                $profileImage = null;
+
+                changeProfileName($profileName,$userIdxInToken);
+                $res->isSuccess = TRUE;
+                $res->code = 100;
+                $res->message = "유저 프로필 정보 수정 성공";
                 echo json_encode($res, JSON_NUMERIC_CHECK);
                 break;
             }
-
-            $profileImage = $req->profileImage;
 
             if (is_numeric($profileImage)) {
                 $res->isSuccess = FALSE;
                 $res->code = 213;
-                $res->message = "입력하신 값의 타입이 틀립니다";
+                $res->message = "입력하신 이미지URL값의 타입이 틀립니다";
                 echo json_encode($res, JSON_NUMERIC_CHECK);
                 break;
             }
 
-            changeProfileImage($profileImage,$userIdxInToken);
+//            if(mb_strlen($req->profileName,'UTF-8')< 2 or mb_strlen($req->profileName,'UTF-8') > 20) {
+//                $res->isSuccess = FALSE;
+//                $res->code = 215;
+//                $res->message = "이름은 최소 2자 최대 20자 입니다";
+//                echo json_encode($res, JSON_NUMERIC_CHECK);
+//                break;
+//            }
+
+            changeProfileInfo($profileImage,$profileName,$userIdxInToken);
             $res->isSuccess = TRUE;
             $res->code = 100;
-            $res->message = "유저 프로필 이미지 수정 성공";
+            $res->message = "유저 프로필 정보 수정 성공";
             echo json_encode($res, JSON_NUMERIC_CHECK);
             break;
-
-        case "changeProfileName":
-            http_response_code(200);
-
-            $jwt = $_SERVER['HTTP_X_ACCESS_TOKEN'];
-            $userIdxInToken = getDataByJWToken($jwt,JWT_SECRET_KEY)->userIdx;
-
-            if (!isValidJWT($jwt,JWT_SECRET_KEY)) {
-                $res->isSuccess = FALSE;
-                $res->code = 202;
-                $res->message = "유효하지 않은 토큰입니다";
-                echo json_encode($res, JSON_NUMERIC_CHECK);
-                addErrorLogs($errorLogs, $res, $req);
-                return;
-            }
-
-            if (!isset($req->profileName) or empty($req->profileName)==true) {
-                $res->isSuccess = FALSE;
-                $res->code = 221;
-                $res->message = "변경하실 이름을 입력해주세요";
-                echo json_encode($res, JSON_NUMERIC_CHECK);
-                break;
-            }
-
-            if(mb_strlen($req->profileName,'UTF-8')< 2 or mb_strlen($req->profileName,'UTF-8') > 20) {
-                $res->isSuccess = FALSE;
-                $res->code = 215;
-                $res->message = "이름은 최소 2자 최대 20자 입니다";
-                echo json_encode($res, JSON_NUMERIC_CHECK);
-                break;
-            }
-
-            $profileName = $req->profileName;
-
-            if (is_numeric($profileName)) {
-                $res->isSuccess = FALSE;
-                $res->code = 213;
-                $res->message = "입력하신 값의 타입이 틀립니다";
-                echo json_encode($res, JSON_NUMERIC_CHECK);
-                break;
-            }
-
-            changeProfileName($profileName,$userIdxInToken);
-            $res->isSuccess = TRUE;
-            $res->code = 100;
-            $res->message = "유저 프로필 이름 수정 성공";
-            echo json_encode($res, JSON_NUMERIC_CHECK);
-            break;
-
 
 
     }

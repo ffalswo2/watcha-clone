@@ -361,12 +361,12 @@ function getProfile($userIdxInToken) {
     return $res[0];
 }
 
-function changeProfileImage($profileImage,$userIdxInToken) {
+function changeProfileInfo($profileImage,$profileName,$userIdxInToken) {
     $pdo = pdoSqlConnect();
-    $query = "UPDATE profile SET profileImage = ? where userIdx = ?;";
+    $query = "UPDATE profile SET profileImage = ?,`name` = ? where userIdx = ?;";
 
     $st = $pdo->prepare($query);
-    $st->execute([$profileImage,$userIdxInToken]);
+    $st->execute([$profileImage,$profileName,$userIdxInToken]);
 
     $st = null;
     $pdo = null;

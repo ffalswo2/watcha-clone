@@ -554,6 +554,31 @@ try {
             echo json_encode($res, JSON_NUMERIC_CHECK);
             break;
 
+        case "searchVidByName":
+            http_response_code(200);
+
+            $keyword = $_GET['keyword'];
+            $keyword = str_replace(' ','',$keyword);
+
+            $res->result = searchVidByName($keyword);
+            $res->isSuccess = TRUE;
+            $res->code = 100;
+            $res->message = "영상 검색 성공";
+            echo json_encode($res, JSON_NUMERIC_CHECK);
+            break;
+
+        case "getPopularVideos":
+            http_response_code(200);
+
+            $popularVideos = getPopularVideosByOrder();
+
+            $res->result = $popularVideos;
+            $res->isSuccess = TRUE;
+            $res->code = 100;
+            $res->message = "인기 검색 영상 조회 성공";
+            echo json_encode($res, JSON_NUMERIC_CHECK);
+            break;
+
 
     }
 } catch (\Exception $e) {

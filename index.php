@@ -36,6 +36,8 @@ $dispatcher = FastRoute\simpleDispatcher(function (FastRoute\RouteCollector $r) 
     $r->addRoute('POST', '/user/rating-video/{video-idx}', ['IndexController', 'rateWithStar']); // 별점 평가하기
     $r->addRoute('GET', '/user/profile', ['IndexController', 'getProfile']); // 유저 프로필 조회
     $r->addRoute('PATCH', '/user/profile-info', ['IndexController', 'changeProfileInfo']); // 유저 프로필 이미지 수정
+    $r->addRoute('GET', '/video-name', ['IndexController', 'searchVidByName']); // 이름으로 영상 검색
+    $r->addRoute('GET', '/popular-videos', ['IndexController', 'getPopularVideos']); // 인기 검색 영상 조회
 
 
 

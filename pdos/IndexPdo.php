@@ -413,6 +413,62 @@ function checkUserAlreadyRate($profileIdx,$videoIdx) {
     return $res[0]['exist'];
 }
 
+function searchVidByName($keyword)
+{
+    try {
+        $pdo = pdoSqlConnect();
+
+        $pdo->beginTransaction();
+
+        $query1 = "select posterImage,videoName from video where replace(videoName, ' ', '') like concat('%',?,'%');";
+
+        $st = $pdo->prepare($query1);
+        $st->execute([$keyword]);
+
+        $st->setFetchMode(PDO::FETCH_ASSOC);
+        $res = $st->fetchAll();
+
+        $query2 = "INSERT INTO searchHistory (keyword) VALUES (?);";
+
+        $st = $pdo->prepare($query2);
+        $st->execute([$keyword]);
+
+        $pdo->commit();
+
+        $st = null;
+        $pdo = null;
+
+        return $res;
+    }
+    catch (Exception $e) {
+        echo $e->getMessage();
+        $pdo->rollback();
+    }
+}
+
+function getPopularVideosByOrder() {
+    $pdo = pdoSqlConnect();
+    $query = "select posterImage, videoName
+from searchHistory
+         left join video on keyword = videoName
+where keyword = videoName
+group by keyword
+order by count(keyword) DESC
+limit 6;";
+
+    $st = $pdo->prepare($query);
+    $st->execute([]);
+    //    $st->execute();
+    $st->setFetchMode(PDO::FETCH_ASSOC);
+    $res = $st->fetchAll();
+
+    $st = null;
+    $pdo = null;
+
+    return $res;
+}
+
+
 
 // CREATE
 //    function addMaintenance($message){

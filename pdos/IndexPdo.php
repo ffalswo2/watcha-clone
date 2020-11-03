@@ -68,15 +68,32 @@ function createUser($ID, $pwd, $name)
 
 }
 
+
 function addNaverUser($naverId,$email,$name,$profileImg) {
-    $pdo = pdoSqlConnect();
-    $query = "INSERT INTO user (naverId,email,naverName,naverProfile) VALUES (?,?,?,?);";
+    try {
+        $pdo = pdoSqlConnect();
 
-    $st = $pdo->prepare($query);
-    $st->execute([$naverId,$email,$name,$profileImg]);
+        $pdo->beginTransaction();
 
-    $st = null;
-    $pdo = null;
+        $query1 = "INSERT INTO user (naverId,email,naverName) VALUES (?,?,?);";
+
+        $st = $pdo->prepare($query1);
+        $st->execute([$naverId,$email,$name]);
+
+        $query2 = "INSERT INTO profile (userIdx,profileImage,`name`) VALUES (LAST_INSERT_ID(),?,?);";
+
+        $st = $pdo->prepare($query2);
+        $st->execute([$profileImg,$name]);
+
+        $pdo->commit();
+
+        $st = null;
+        $pdo = null;
+    }
+    catch (Exception $e) {
+        echo $e->getMessage();
+        $pdo->rollback();
+    }
 
 }
 
@@ -330,7 +347,7 @@ function likeVideo($profileIdx,$videoIdx) {
 
 function getProfile($userIdxInToken) {
     $pdo = pdoSqlConnect();
-    $query = "select profile.idx as profileIdx,name,naverProfile as profileImage from profile left join user on profile.userIdx = user.idx where profile.userIdx = ?;";
+    $query = "select profile.idx as profileIdx,name,profileImage from profile left join user on profile.userIdx = user.idx where profile.userIdx = ?;";
 
     $st = $pdo->prepare($query);
     $st->execute([$userIdxInToken]);
@@ -344,6 +361,29 @@ function getProfile($userIdxInToken) {
     return $res[0];
 }
 
+function changeProfileImage($profileImage,$userIdxInToken) {
+    $pdo = pdoSqlConnect();
+    $query = "UPDATE profile SET profileImage = ? where userIdx = ?;";
+
+    $st = $pdo->prepare($query);
+    $st->execute([$profileImage,$userIdxInToken]);
+
+    $st = null;
+    $pdo = null;
+
+}
+
+function changeProfileName($profileName,$userIdxInToken) {
+    $pdo = pdoSqlConnect();
+    $query = "UPDATE profile SET `name` = ? where userIdx = ?;";
+
+    $st = $pdo->prepare($query);
+    $st->execute([$profileName,$userIdxInToken]);
+
+    $st = null;
+    $pdo = null;
+
+}
 
 
 // CREATE

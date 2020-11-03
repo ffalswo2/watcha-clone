@@ -35,6 +35,8 @@ $dispatcher = FastRoute\simpleDispatcher(function (FastRoute\RouteCollector $r) 
     $r->addRoute('PATCH', '/profile/{profile-idx}/good-video/{video-idx}', ['IndexController', 'likeVideo']); // 특정 영상 보고싶어요 추가/삭제
     $r->addRoute('POST', '/profile/{profile-idx}/rating-stars', ['IndexController', 'naverLogin']); // 별점 평가하기 미완
     $r->addRoute('GET', '/user/profile', ['IndexController', 'getProfile']); // 유저 프로필 조회
+    $r->addRoute('PATCH', '/user/profile-image', ['IndexController', 'changeProfileImage']); // 유저 프로필 이미지 수정
+    $r->addRoute('PATCH', '/user/profile-name', ['IndexController', 'changeProfileName']); // 유저 프로필 이름 수정
 
 
 

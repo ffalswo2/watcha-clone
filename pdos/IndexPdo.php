@@ -120,7 +120,7 @@ function getVideos($profileIdx)
 from video
 where videoName not in (select videoName
                         from video
-                                 right outer join bannedVideo on bannedVideo.videoIdx = video.idx);";
+                                 right outer join bannedVideo on bannedVideo.videoIdx = video.idx where status = 'D');";
 
     $st = $pdo->prepare($query);
     //    $st->execute([$param,$param]);
@@ -325,7 +325,23 @@ function likeVideo($profileIdx,$videoIdx) {
         echo $e->getMessage();
         $pdo->rollback();
     }
-    
+
+}
+
+function getProfile($userIdxInToken) {
+    $pdo = pdoSqlConnect();
+    $query = "select profile.idx as profileIdx,name,naverProfile as profileImage from profile left join user on profile.userIdx = user.idx where profile.userIdx = ?;";
+
+    $st = $pdo->prepare($query);
+    $st->execute([$userIdxInToken]);
+    //    $st->execute();
+    $st->setFetchMode(PDO::FETCH_ASSOC);
+    $res = $st->fetchAll();
+
+    $st = null;
+    $pdo = null;
+
+    return $res[0];
 }
 
 

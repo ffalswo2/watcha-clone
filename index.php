@@ -33,7 +33,8 @@ $dispatcher = FastRoute\simpleDispatcher(function (FastRoute\RouteCollector $r) 
     $r->addRoute('GET', '/videos/category', ['IndexController', 'searchVidByCategory']); // 카테고리별로 영상 검색
     $r->addRoute('PATCH', '/profile/{profile-idx}/no-video/{video-idx}', ['IndexController', 'banVideo']); // 특정 영상 관심없어요 추가/삭제
     $r->addRoute('PATCH', '/profile/{profile-idx}/good-video/{video-idx}', ['IndexController', 'likeVideo']); // 특정 영상 보고싶어요 추가/삭제
-
+    $r->addRoute('POST', '/profile/{profile-idx}/rating-stars', ['IndexController', 'naverLogin']); // 별점 평가하기 미완
+    $r->addRoute('GET', '/user/profile', ['IndexController', 'getProfile']); // 유저 프로필 조회
 
 
 
@@ -93,30 +94,30 @@ switch ($routeInfo[0]) {
                 $vars = $routeInfo[2];
                 require './controllers/JWTController.php';
                 break;
-            /*case 'EventController':
-                $handler = $routeInfo[1][1]; $vars = $routeInfo[2];
-                require './controllers/EventController.php';
-                break;
-            case 'ProductController':
-                $handler = $routeInfo[1][1]; $vars = $routeInfo[2];
-                require './controllers/ProductController.php';
-                break;
-            case 'SearchController':
-                $handler = $routeInfo[1][1]; $vars = $routeInfo[2];
-                require './controllers/SearchController.php';
-                break;
-            case 'ReviewController':
-                $handler = $routeInfo[1][1]; $vars = $routeInfo[2];
-                require './controllers/ReviewController.php';
-                break;
-            case 'ElementController':
-                $handler = $routeInfo[1][1]; $vars = $routeInfo[2];
-                require './controllers/ElementController.php';
-                break;
-            case 'AskFAQController':
-                $handler = $routeInfo[1][1]; $vars = $routeInfo[2];
-                require './controllers/AskFAQController.php';
-                break;*/
+//            case 'EventController':
+//                $handler = $routeInfo[1][1]; $vars = $routeInfo[2];
+//                require './controllers/EventController.php';
+//                break;
+//            case 'ProductController':
+//                $handler = $routeInfo[1][1]; $vars = $routeInfo[2];
+//                require './controllers/ProductController.php';
+//                break;
+//            case 'SearchController':
+//                $handler = $routeInfo[1][1]; $vars = $routeInfo[2];
+//                require './controllers/SearchController.php';
+//                break;
+//            case 'ReviewController':
+//                $handler = $routeInfo[1][1]; $vars = $routeInfo[2];
+//                require './controllers/ReviewController.php';
+//                break;
+//            case 'ElementController':
+//                $handler = $routeInfo[1][1]; $vars = $routeInfo[2];
+//                require './controllers/ElementController.php';
+//                break;
+//            case 'AskFAQController':
+//                $handler = $routeInfo[1][1]; $vars = $routeInfo[2];
+//                require './controllers/AskFAQController.php';
+//                break;
         }
 
         break;

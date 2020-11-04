@@ -133,15 +133,25 @@ function getIdxNaverId($naverId)
 function getVideos($profileIdx)
 {
     $pdo = pdoSqlConnect();
-    $query = "select (select count(*) from rating where rating.profileIdx = ? and rating.isDeleted = 'N') as ratingNum, posterImage, videoName, year
+    $query = "select (select count(*) from rating where rating.profileIdx = ? and rating.isDeleted = 'N') as ratingNum,
+       posterImage,
+       videoName,
+       year
 from video
 where videoName not in (select videoName
                         from video
-                                 right outer join bannedVideo on bannedVideo.videoIdx = video.idx where status = 'D');";
+                                 right outer join bannedVideo on bannedVideo.videoIdx = video.idx
+                                 left join profile on bannedVideo.profileIdx = profile.idx
+                        where status = 'D'
+                          and bannedVideo.profileIdx = ?)
+  and videoName not in (select videoName
+                        from video
+                                 left join rating on rating.videoIdx = video.idx
+                        where rating.isDeleted = 'N');";
 
     $st = $pdo->prepare($query);
     //    $st->execute([$param,$param]);
-    $st->execute([$profileIdx]);
+    $st->execute([$profileIdx,$profileIdx]);
     $st->setFetchMode(PDO::FETCH_ASSOC);
     $res = $st->fetchAll();
 

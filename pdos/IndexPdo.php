@@ -133,7 +133,7 @@ function getIdxNaverId($naverId)
 function getVideos($profileIdx)
 {
     $pdo = pdoSqlConnect();
-    $query = "select (select count(*) from rating where rating.profileIdx = ?) as ratingNum, posterImage, videoName, year
+    $query = "select (select count(*) from rating where rating.profileIdx = ? and rating.isDeleted = 'N') as ratingNum, posterImage, videoName, year
 from video
 where videoName not in (select videoName
                         from video
@@ -468,8 +468,33 @@ limit 6;";
     return $res;
 }
 
+function checkRateDeleted($profileIdx,$videoIdx) {
+    $pdo = pdoSqlConnect();
+    $query = "SELECT isDeleted FROM rating WHERE profileIdx = ? and videoIdx = ?;";
 
+    $st = $pdo->prepare($query);
+    $st->execute([$profileIdx,$videoIdx]);
+    //    $st->execute();
+    $st->setFetchMode(PDO::FETCH_ASSOC);
+    $res = $st->fetchAll();
 
+    $st = null;
+    $pdo = null;
+
+    return $res[0]['isDeleted'];
+}
+
+function deleteRate($profileIdx,$videoIdx) {
+    $pdo = pdoSqlConnect();
+    $query = "UPDATE rating SET isDeleted = 'Y' where profileIdx = ? and videoIdx = ?;";
+
+    $st = $pdo->prepare($query);
+    $st->execute([$profileIdx,$videoIdx]);
+
+    $st = null;
+    $pdo = null;
+
+}
 // CREATE
 //    function addMaintenance($message){
 //        $pdo = pdoSqlConnect();

@@ -539,7 +539,7 @@ try {
                 break;
             }
 
-            if (checkUserAlreadyRate($profileIdxInToken,$videoIdx)) { // 평가한 영상은 또 평가할 수 없음
+            if (checkUserAlreadyRate($profileIdxInToken,$videoIdx) and checkRateDeleted($profileIdxInToken,$videoIdx)=='N') { // 평가한 영상은 또 평가할 수 없음
                 $res->isSuccess = FALSE;
                 $res->code = 300;
                 $res->message = "한번 평가한 영상은 더 이상 평가할 수 없습니다";
@@ -576,6 +576,63 @@ try {
             $res->isSuccess = TRUE;
             $res->code = 100;
             $res->message = "인기 검색 영상 조회 성공";
+            echo json_encode($res, JSON_NUMERIC_CHECK);
+            break;
+
+        case "deleteRate":
+            http_response_code(200);
+
+            $jwt = $_SERVER['HTTP_X_ACCESS_TOKEN'];
+            $userIdxInToken = getDataByJWToken($jwt,JWT_SECRET_KEY)->userIdx;
+            $profileIdxInToken = getDataByJWToken($jwt,JWT_SECRET_KEY)->profileIdx;
+
+            if (!isValidJWT($jwt,JWT_SECRET_KEY)) {
+                $res->isSuccess = FALSE;
+                $res->code = 202;
+                $res->message = "유효하지 않은 토큰입니다";
+                echo json_encode($res, JSON_NUMERIC_CHECK);
+                addErrorLogs($errorLogs, $res, $req);
+                return;
+            }
+
+            if (!isset($vars['video-idx']) or empty($vars['video-idx'])==true) {
+                $res->isSuccess = FALSE;
+                $res->code = 221;
+                $res->message = "videoIdx를 입력해주세요";
+                echo json_encode($res, JSON_NUMERIC_CHECK);
+                break;
+            }
+
+            $videoIdx = $vars['video-idx'];
+
+            if (!is_numeric($videoIdx)) {
+                $res->isSuccess = FALSE;
+                $res->code = 213;
+                $res->message = "videoIdx 타입이 틀립니다";
+                echo json_encode($res, JSON_NUMERIC_CHECK);
+                break;
+            }
+
+            if (!isValidVideoIdx($videoIdx)) {
+                $res->isSuccess = FALSE;
+                $res->code = 223;
+                $res->message = "유효하지 않은 비디오 idx입니다";
+                echo json_encode($res, JSON_NUMERIC_CHECK);
+                break;
+            }
+
+            if (!checkUserAlreadyRate($profileIdxInToken,$videoIdx)) { // 이미 삭제된건지 확인
+                $res->isSuccess = FALSE;
+                $res->code = 300;
+                $res->message = "평가하지 않은 영상idx입니다";
+                echo json_encode($res, JSON_NUMERIC_CHECK);
+                break;
+            }
+
+            deleteRate($profileIdxInToken,$videoIdx);
+            $res->isSuccess = TRUE;
+            $res->code = 100;
+            $res->message = "유저 별점 평가 취소 성공";
             echo json_encode($res, JSON_NUMERIC_CHECK);
             break;
 

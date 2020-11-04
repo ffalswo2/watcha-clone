@@ -14,7 +14,7 @@ ini_set('default_charset', 'utf8mb4');
 //에러출력하게 하는 코드
 //error_reporting(E_ALL); ini_set("display_errors", 1);
 
-//Main Server API main main
+//Main Server API main
 $dispatcher = FastRoute\simpleDispatcher(function (FastRoute\RouteCollector $r) {
     /* ******************   JWT   ****************** */
     $r->addRoute('POST', '/jwt', ['JWTController', 'createJwt']);   // JWT 생성: 로그인 + 해싱된 패스워드 검증 내용 추가
@@ -38,6 +38,7 @@ $dispatcher = FastRoute\simpleDispatcher(function (FastRoute\RouteCollector $r) 
     $r->addRoute('PATCH', '/user/profile-info', ['IndexController', 'changeProfileInfo']); // 유저 프로필 이미지 수정
     $r->addRoute('GET', '/video-name', ['IndexController', 'searchVidByName']); // 이름으로 영상 검색
     $r->addRoute('GET', '/popular-videos', ['IndexController', 'getPopularVideos']); // 인기 검색 영상 조회
+    $r->addRoute('DELETE', '/user/rating-video/{video-idx}', ['IndexController', 'deleteRate']); // 별점 평가하기 취소하기
 
 
 

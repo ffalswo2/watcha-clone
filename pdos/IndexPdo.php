@@ -357,7 +357,11 @@ function likeVideo($profileIdx,$videoIdx) {
 
 function getProfile($userIdxInToken) {
     $pdo = pdoSqlConnect();
-    $query = "select profile.idx as profileIdx,name,profileImage from profile left join user on profile.userIdx = user.idx where profile.userIdx = ?;";
+    $query = "select profile.idx as profileIdx, name, profileImage,membershipName,membership.expireDate as memberShipExpireDate
+from profile
+         left join user on profile.userIdx = user.idx
+         left join membership on profile.userIdx = user.idx
+where profile.userIdx = ? group by name;";
 
     $st = $pdo->prepare($query);
     $st->execute([$userIdxInToken]);

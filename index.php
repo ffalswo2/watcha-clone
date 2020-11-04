@@ -27,7 +27,7 @@ $dispatcher = FastRoute\simpleDispatcher(function (FastRoute\RouteCollector $r) 
     $r->addRoute('GET', '/users/{userIdx}', ['IndexController', 'getUserDetail']);
     $r->addRoute('POST', '/user', ['IndexController', 'createUser']); // 비밀번호 해싱 예시 추가
 
-    $r->addRoute('POST', '/naver/user', ['IndexController', 'naverSignUp']); // 네이버 회원가입
+//    $r->addRoute('POST', '/naver/user', ['IndexController', 'naverSignUp']); // 네이버 회원가입
     $r->addRoute('POST', '/naver/login', ['JWTController', 'naverLogin']); // 네이버 로그인
     $r->addRoute('GET', '/user/videos', ['IndexController', 'getVideos']); // 유저 기반 모든 영상 조회 (평가하기)
     $r->addRoute('GET', '/genre', ['IndexController', 'getGenreIdx']); // 장르 idx 조회

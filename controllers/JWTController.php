@@ -112,12 +112,23 @@ try {
                 $name = $profileResponse->response->name;
 
                 // 1) 로그인 시 email, password 받기
-                if (!isValidNaverUser($naverId, $email)) { // JWTPdo.php 에 구현
-                    $res->isSuccess = FALSE;
-                    $res->code = 201;
-                    $res->message = "유효하지 않은 네이버 아이디 입니다";
+                if (!isValidNaverUser($naverId, $email)) { // JWTPdo.php 에 구현, 회원가입까지 시키고 jwt 발급을 여기서하도록
+
+                    addNaverUser($naverId,$email,$name,$profileImg);
+
+                    // 2) JWT 발급
+                    // Payload에 맞게 다시 설정 요함, 아래는 Payload에 userIdx를 넣기 위한 과정
+                    $userIdx = getUserIdxByNaverId($naverId);  // JWTPdo.php 에 구현
+                    $profileIdx = getProfileIdxByUserIdx($userIdx);
+
+                    $jwt = getJWT($userIdx,$profileIdx, JWT_SECRET_KEY); // function.php 에 구현
+
+                    $res->result->jwt = $jwt;
+                    $res->isSuccess = TRUE;
+                    $res->code = 100;
+                    $res->message = "네이버 회원가입 후 로그인 성공(jwt 발급 성공)";
                     echo json_encode($res, JSON_NUMERIC_CHECK);
-                    return;
+                    break;
                 }
 
                 // 2) JWT 발급

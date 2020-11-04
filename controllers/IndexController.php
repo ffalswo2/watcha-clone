@@ -124,7 +124,7 @@ try {
 
                 addNaverUser($naverId,$email,$name,$profileImg);
 
-                $res->result = getIdxNaverId($naverId);
+//                $res->result = getIdxNaverId($naverId);
                 $res->isSuccess = TRUE;
                 $res->code = 100;
                 $res->message = "네이버 회원가입 성공";

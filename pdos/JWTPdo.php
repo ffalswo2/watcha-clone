@@ -61,3 +61,31 @@ function isValidNaverUser($naverId, $email){
 
     return $res[0]['exist'];
 }
+
+function addNaverUser($naverId,$email,$name,$profileImg) {
+    try {
+        $pdo = pdoSqlConnect();
+
+        $pdo->beginTransaction();
+
+        $query1 = "INSERT INTO user (naverId,email,naverName) VALUES (?,?,?);";
+
+        $st = $pdo->prepare($query1);
+        $st->execute([$naverId,$email,$name]);
+
+        $query2 = "INSERT INTO profile (userIdx,profileImage,`name`) VALUES (LAST_INSERT_ID(),?,?);";
+
+        $st = $pdo->prepare($query2);
+        $st->execute([$profileImg,$name]);
+
+        $pdo->commit();
+
+        $st = null;
+        $pdo = null;
+    }
+    catch (Exception $e) {
+        echo $e->getMessage();
+        $pdo->rollback();
+    }
+
+}

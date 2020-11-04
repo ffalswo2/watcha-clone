@@ -1,5 +1,6 @@
 <?php
 
+require './pdos/SearchPdo.php';
 require './pdos/DatabasePdo.php';
 require './pdos/IndexPdo.php';
 require './pdos/JWTPdo.php';
@@ -14,7 +15,7 @@ ini_set('default_charset', 'utf8mb4');
 //에러출력하게 하는 코드
 //error_reporting(E_ALL); ini_set("display_errors", 1);
 
-//Main Server API main
+//Main Server API main main
 $dispatcher = FastRoute\simpleDispatcher(function (FastRoute\RouteCollector $r) {
     /* ******************   JWT   ****************** */
     $r->addRoute('POST', '/jwt', ['JWTController', 'createJwt']);   // JWT 생성: 로그인 + 해싱된 패스워드 검증 내용 추가
@@ -30,7 +31,7 @@ $dispatcher = FastRoute\simpleDispatcher(function (FastRoute\RouteCollector $r) 
     $r->addRoute('POST', '/naver/login', ['JWTController', 'naverLogin']); // 네이버 로그인
     $r->addRoute('GET', '/user/videos', ['IndexController', 'getVideos']); // 유저 기반 모든 영상 조회 (평가하기)
     $r->addRoute('GET', '/genre', ['IndexController', 'getGenreIdx']); // 장르 idx 조회
-    $r->addRoute('GET', '/videos/category', ['IndexController', 'searchVidByCategory']); // 카테고리별로 영상 검색
+    $r->addRoute('GET', '/videos/category', ['SearchController', 'searchVidByCategory']); // 카테고리별로 영상 검색
     $r->addRoute('PATCH', '/user/no-video/{video-idx}', ['IndexController', 'banVideo']); // 특정 영상 관심없어요 추가/삭제
     $r->addRoute('PATCH', '/user/good-video/{video-idx}', ['IndexController', 'likeVideo']); // 특정 영상 보고싶어요 추가/삭제
     $r->addRoute('POST', '/user/rating-video/{video-idx}', ['IndexController', 'rateWithStar']); // 별점 평가하기
@@ -106,10 +107,10 @@ switch ($routeInfo[0]) {
 //                $handler = $routeInfo[1][1]; $vars = $routeInfo[2];
 //                require './controllers/ProductController.php';
 //                break;
-//            case 'SearchController':
-//                $handler = $routeInfo[1][1]; $vars = $routeInfo[2];
-//                require './controllers/SearchController.php';
-//                break;
+            case 'SearchController':
+                $handler = $routeInfo[1][1]; $vars = $routeInfo[2];
+                require './controllers/SearchController.php';
+                break;
 //            case 'ReviewController':
 //                $handler = $routeInfo[1][1]; $vars = $routeInfo[2];
 //                require './controllers/ReviewController.php';

@@ -427,38 +427,38 @@ function checkUserAlreadyRate($profileIdx,$videoIdx) {
     return $res[0]['exist'];
 }
 
-function searchVidByName($keyword)
-{
-    try {
-        $pdo = pdoSqlConnect();
-
-        $pdo->beginTransaction();
-
-        $query1 = "select posterImage,videoName from video where replace(videoName, ' ', '') like concat('%',?,'%');";
-
-        $st = $pdo->prepare($query1);
-        $st->execute([$keyword]);
-
-        $st->setFetchMode(PDO::FETCH_ASSOC);
-        $res = $st->fetchAll();
-
-        $query2 = "INSERT INTO searchHistory (keyword) VALUES (?);";
-
-        $st = $pdo->prepare($query2);
-        $st->execute([$keyword]);
-
-        $pdo->commit();
-
-        $st = null;
-        $pdo = null;
-
-        return $res;
-    }
-    catch (Exception $e) {
-        echo $e->getMessage();
-        $pdo->rollback();
-    }
-}
+//function searchVidByName($keyword)
+//{
+//    try {
+//        $pdo = pdoSqlConnect();
+//
+//        $pdo->beginTransaction();
+//
+//        $query1 = "select posterImage,videoName from video where replace(videoName, ' ', '') like concat('%',?,'%');";
+//
+//        $st = $pdo->prepare($query1);
+//        $st->execute([$keyword]);
+//
+//        $st->setFetchMode(PDO::FETCH_ASSOC);
+//        $res = $st->fetchAll();
+//
+//        $query2 = "INSERT INTO searchHistory (keyword) VALUES (?);";
+//
+//        $st = $pdo->prepare($query2);
+//        $st->execute([$keyword]);
+//
+//        $pdo->commit();
+//
+//        $st = null;
+//        $pdo = null;
+//
+//        return $res;
+//    }
+//    catch (Exception $e) {
+//        echo $e->getMessage();
+//        $pdo->rollback();
+//    }
+//}
 
 function getPopularVideosByOrder() {
     $pdo = pdoSqlConnect();
@@ -509,6 +509,171 @@ function deleteRate($profileIdx,$videoIdx) {
     $pdo = null;
 
 }
+
+function checkMovie($videoIdx) {
+    $pdo = pdoSqlConnect();
+    $query = "SELECT `time` FROM video WHERE idx = ?;";
+
+    $st = $pdo->prepare($query);
+    $st->execute([$videoIdx]);
+    //    $st->execute();
+    $st->setFetchMode(PDO::FETCH_ASSOC);
+    $res = $st->fetchAll();
+
+    $st = null;
+    $pdo = null;
+
+    return $res[0]['time'];
+}
+
+function getMovieInfo($videoIdx) {
+    try {
+        $pdo = pdoSqlConnect();
+
+        $pdo->beginTransaction();
+
+        $query1 = "select videoUrl,
+       round((select avg(rating) from rating where rating.videoIdx = video.idx and rating.isDeleted = 'N'),
+             1)                                                                         as ratingAvg,
+       videoName,
+       case when ageGrade > 18 then concat('청불') else concat(ageGrade, '세') end         as ageGrade,
+       case
+           when video.time is null then concat('에피소드 ', (select count(*) from episode where episode.videoIdx = ?), '개')
+           when video.time > 60 then concat(video.time div 60, '시간', video.time % 60, '분')
+           when video.time < 60 then concat(video.time, '분') end                        as timeOrEpisode,
+       summary,
+       director,
+       actors,
+       concat(group_concat(genre.genreTitle), ' / ', country, ' / ', concat(year, '년')) as outline
+from video
+         left join episode on episode.videoIdx = video.idx
+         left join genreVideo on genreVideo.videoIdx = video.idx
+         left join genre on genreVideo.genreIdx = genre.idx
+         left join review on review.videoIdx = video.idx
+where video.idx = ?
+group by time;";
+
+        $st = $pdo->prepare($query1);
+        $st->execute([$videoIdx,$videoIdx]);
+
+        $st->setFetchMode(PDO::FETCH_ASSOC);
+        $res['info'] = $st->fetchAll();
+
+        $query2 = "select count(*) as reviewNum from review where review.videoIdx = ?;";
+
+        $st = $pdo->prepare($query2);
+        $st->execute([$videoIdx]);
+        $st->setFetchMode(PDO::FETCH_ASSOC);
+        $res['reviewNum'] = $st->fetchAll();
+
+        $query3 = "select review.userName as userName, review.comment as reviewComment from review where review.videoIdx = ?;";
+
+        $st = $pdo->prepare($query3);
+        $st->execute([$videoIdx]);
+        $st->setFetchMode(PDO::FETCH_ASSOC);
+        $res['review'] = $st->fetchAll();
+
+        $query4 = "select posterImage, videoName
+from video
+         left join genreVideo on genreVideo.videoIdx = video.idx
+         left join genre on genreVideo.genreIdx = genre.idx
+where genre.idx in (select GROUP_CONCAT(genre.idx SEPARATOR ',') as genreIdx
+                    from video
+                             left join genreVideo on genreVideo.videoIdx = video.idx
+                             left join genre on genreVideo.genreIdx = genre.idx
+                    where video.idx = ?);";
+
+        $st = $pdo->prepare($query4);
+        $st->execute([$videoIdx]);
+        $st->setFetchMode(PDO::FETCH_ASSOC);
+        $res['similarContents'] = $st->fetchAll();
+
+        $pdo->commit();
+
+        $st = null;
+        $pdo = null;
+
+        return $res;
+    }
+    catch (Exception $e) {
+        echo $e->getMessage();
+        $pdo->rollback();
+    }
+
+}
+
+function getDramaInfo($videoIdx) {
+    try {
+        $pdo = pdoSqlConnect();
+
+        $pdo->beginTransaction();
+
+        $query1 = "select videoUrl,
+       round((select avg(rating) from rating where rating.videoIdx = video.idx and rating.isDeleted = 'N'),
+             1)                                                                         as ratingAvg,
+       videoName,
+       case when ageGrade > 18 then concat('청불') else concat(ageGrade, '세') end         as ageGrade,
+       case
+           when video.time is null then concat('에피소드 ', (select count(*) from episode where episode.videoIdx = ?), '개')
+           when video.time > 60 then concat(video.time div 60, '시간', video.time % 60, '분')
+           when video.time < 60 then concat(video.time, '분') end                        as timeOrEpisode,
+       summary,
+       director,
+       actors,
+       concat(group_concat(genre.genreTitle), ' / ', country, ' / ', concat(year, '년')) as outline
+from video
+         left join episode on episode.videoIdx = video.idx
+         left join genreVideo on genreVideo.videoIdx = video.idx
+         left join genre on genreVideo.genreIdx = genre.idx
+         left join review on review.videoIdx = video.idx
+where video.idx = ?
+group by time;";
+
+        $st = $pdo->prepare($query1);
+        $st->execute([$videoIdx,$videoIdx]);
+
+        $st->setFetchMode(PDO::FETCH_ASSOC);
+        $res['info'] = $st->fetchAll();
+
+        $query2 = "select count(*) as reviewNum from review where review.videoIdx = ?;";
+
+        $st = $pdo->prepare($query2);
+        $st->execute([$videoIdx]);
+        $st->setFetchMode(PDO::FETCH_ASSOC);
+        $res['reviewNum'] = $st->fetchAll();
+
+        $query3 = "select review.userName as userName, review.comment as reviewComment from review where review.videoIdx = ?;";
+
+        $st = $pdo->prepare($query3);
+        $st->execute([$videoIdx]);
+        $st->setFetchMode(PDO::FETCH_ASSOC);
+        $res['review'] = $st->fetchAll();
+
+        $query4 = "select episodeUrl, concat('에피소드 ',episodeNum) as episodeNum, episodeTitle,
+       case when episodeTime > 60 then concat(episodeTime div 60, '시간', episodeTime % 60, '분')
+           when episodeTime < 60 then concat(episodeTime, '분') end                        as episodeTime
+from episode
+where episode.videoIdx = ?;";
+
+        $st = $pdo->prepare($query4);
+        $st->execute([$videoIdx]);
+        $st->setFetchMode(PDO::FETCH_ASSOC);
+        $res['episode'] = $st->fetchAll();
+
+        $pdo->commit();
+
+        $st = null;
+        $pdo = null;
+
+        return $res;
+    }
+    catch (Exception $e) {
+        echo $e->getMessage();
+        $pdo->rollback();
+    }
+
+}
+
 // CREATE
 //    function addMaintenance($message){
 //        $pdo = pdoSqlConnect();

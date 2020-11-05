@@ -38,6 +38,39 @@ function isValidGenreIdx($keyword) {
     return $res[0]['exist'];
 }
 
+function searchVidByName($keyword)
+{
+    try {
+        $pdo = pdoSqlConnect();
+
+        $pdo->beginTransaction();
+
+        $query1 = "select posterImage,videoName from video where replace(videoName, ' ', '') like concat('%',?,'%');";
+
+        $st = $pdo->prepare($query1);
+        $st->execute([$keyword]);
+
+        $st->setFetchMode(PDO::FETCH_ASSOC);
+        $res = $st->fetchAll();
+
+        $query2 = "INSERT INTO searchHistory (keyword) VALUES (?);";
+
+        $st = $pdo->prepare($query2);
+        $st->execute([$keyword]);
+
+        $pdo->commit();
+
+        $st = null;
+        $pdo = null;
+
+        return $res;
+    }
+    catch (Exception $e) {
+        echo $e->getMessage();
+        $pdo->rollback();
+    }
+}
+
 // CREATE
 //    function addMaintenance($message){
 //        $pdo = pdoSqlConnect();

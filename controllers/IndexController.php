@@ -554,18 +554,18 @@ try {
             echo json_encode($res, JSON_NUMERIC_CHECK);
             break;
 
-        case "searchVidByName":
-            http_response_code(200);
-
-            $keyword = $_GET['keyword'];
-            $keyword = str_replace(' ','',$keyword);
-
-            $res->result = searchVidByName($keyword);
-            $res->isSuccess = TRUE;
-            $res->code = 100;
-            $res->message = "영상 검색 성공";
-            echo json_encode($res, JSON_NUMERIC_CHECK);
-            break;
+//        case "searchVidByName":
+//            http_response_code(200);
+//
+//            $keyword = $_GET['keyword'];
+//            $keyword = str_replace(' ','',$keyword);
+//
+//            $res->result = searchVidByName($keyword);
+//            $res->isSuccess = TRUE;
+//            $res->code = 100;
+//            $res->message = "영상 검색 성공";
+//            echo json_encode($res, JSON_NUMERIC_CHECK);
+//            break;
 
         case "getPopularVideos":
             http_response_code(200);
@@ -633,6 +633,51 @@ try {
             $res->isSuccess = TRUE;
             $res->code = 100;
             $res->message = "유저 별점 평가 취소 성공";
+            echo json_encode($res, JSON_NUMERIC_CHECK);
+            break;
+
+        case "getVideoInfo":
+            http_response_code(200);
+
+            if (!isset($vars['video-idx']) or empty($vars['video-idx'])==true) {
+                $res->isSuccess = FALSE;
+                $res->code = 221;
+                $res->message = "videoIdx를 입력해주세요";
+                echo json_encode($res, JSON_NUMERIC_CHECK);
+                break;
+            }
+
+            $videoIdx = $vars['video-idx'];
+
+            if (!is_numeric($videoIdx)) {
+                $res->isSuccess = FALSE;
+                $res->code = 213;
+                $res->message = "videoIdx 타입이 틀립니다";
+                echo json_encode($res, JSON_NUMERIC_CHECK);
+                break;
+            }
+
+            if (!isValidVideoIdx($videoIdx)) {
+                $res->isSuccess = FALSE;
+                $res->code = 223;
+                $res->message = "유효하지 않은 비디오 idx입니다";
+                echo json_encode($res, JSON_NUMERIC_CHECK);
+                break;
+            }
+
+            if (checkMovie($videoIdx)) {
+                $res->result = getMovieInfo($videoIdx);
+                $res->isSuccess = TRUE;
+                $res->code = 100;
+                $res->message = "특정 영화 정보 조회 성공";
+                echo json_encode($res, JSON_NUMERIC_CHECK);
+                break;
+            }
+
+            $res->result = getDramaInfo($videoIdx);
+            $res->isSuccess = TRUE;
+            $res->code = 110;
+            $res->message = "특정 드라마 정보 조회 성공";
             echo json_encode($res, JSON_NUMERIC_CHECK);
             break;
 

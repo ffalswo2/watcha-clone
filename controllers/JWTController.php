@@ -125,7 +125,7 @@ try {
 
                     $res->result->jwt = $jwt;
                     $res->isSuccess = TRUE;
-                    $res->code = 100;
+                    $res->code = 101;
                     $res->message = "네이버 회원가입 후 로그인 성공(jwt 발급 성공)";
                     echo json_encode($res, JSON_NUMERIC_CHECK);
                     break;

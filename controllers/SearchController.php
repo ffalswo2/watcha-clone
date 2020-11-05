@@ -30,22 +30,62 @@ try {
         case "searchVidByCategory":
             http_response_code(200);
 
-            $keyword = $_GET['keyword'];
+            $genre = $_GET['genre'];
+            $country = $_GET['country'];
 
-            if (!isValidGenreIdx($keyword)) {
+            if(empty($_GET['genre']) and empty($_GET['country'])){
                 $res->isSuccess = FALSE;
-                $res->code = 222;
-                $res->message = "유효하지 않은 장르 idx입니다";
+                $res->code = 250;
+                $res->message = "장르와 국가 하나는 입력해 주셔야 합니다";
                 echo json_encode($res, JSON_NUMERIC_CHECK);
                 break;
             }
 
-            $res->result = searchVidByCategory($keyword);
-            $res->isSuccess = TRUE;
-            $res->code = 100;
-            $res->message = "영상 카테고리 검색 성공";
-            echo json_encode($res, JSON_NUMERIC_CHECK);
-            break;
+            if(!empty($_GET['genre']) and !empty($_GET['country'])){
+                $res->isSuccess = FALSE;
+                $res->code = 240;
+                $res->message = "한가지 필터로만 검색할 수 있습니다";
+                echo json_encode($res, JSON_NUMERIC_CHECK);
+                break;
+            }
+
+            if(!empty($_GET['genre']) and empty($_GET['country'])){
+
+                if (!isValidGenreIdx($genre)) {
+                    $res->isSuccess = FALSE;
+                    $res->code = 222;
+                    $res->message = "유효하지 않은 장르 idx입니다";
+                    echo json_encode($res, JSON_NUMERIC_CHECK);
+                    break;
+                } else {
+                    echo $genre,$country;
+                    $res->result = searchVidByCategory($genre);
+                    $res->isSuccess = TRUE;
+                    $res->code = 100;
+                    $res->message = "영상 카테고리 검색 성공";
+                    echo json_encode($res, JSON_NUMERIC_CHECK);
+                    break;
+                }
+
+            }
+
+            if (empty($_GET['genre']) and !empty($_GET['country'])) {
+
+                if (!isValidCountryIdx($country)) {
+                    $res->isSuccess = FALSE;
+                    $res->code = 233;
+                    $res->message = "유효하지 않은 국가 idx입니다";
+                    echo json_encode($res, JSON_NUMERIC_CHECK);
+                    break;
+                } else {
+                    $res->result = searchVidByCountry($country);
+                    $res->isSuccess = TRUE;
+                    $res->code = 100;
+                    $res->message = "영상 카테고리 검색 성공";
+                    echo json_encode($res, JSON_NUMERIC_CHECK);
+                    break;
+                }
+            }
 
         case "searchVidByName":
             http_response_code(200);

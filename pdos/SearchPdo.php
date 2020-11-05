@@ -71,6 +71,43 @@ function searchVidByName($keyword)
     }
 }
 
+function isValidCountryIdx($keyword) {
+    $pdo = pdoSqlConnect();
+    $query = "select exists(select idx from country where idx = ?) as exist;";
+
+    $st = $pdo->prepare($query);
+    $st->execute([$keyword]);
+    //    $st->execute();
+    $st->setFetchMode(PDO::FETCH_ASSOC);
+    $res = $st->fetchAll();
+
+    $st = null;
+    $pdo = null;
+
+    return $res[0]['exist'];
+}
+
+function searchVidByCountry($keyword)
+{
+    $pdo = pdoSqlConnect();
+    $query = "select posterImage, videoName
+from video
+         left join countryVideo on countryVideo.videoIdx = video.idx
+         left join country on countryVideo.countryIdx = country.idx
+where country.idx = ?;";
+
+    $st = $pdo->prepare($query);
+    //    $st->execute([$param,$param]);
+    $st->execute([$keyword]);
+    $st->setFetchMode(PDO::FETCH_ASSOC);
+    $res = $st->fetchAll();
+
+    $st = null;
+    $pdo = null;
+
+    return $res;
+}
+
 // CREATE
 //    function addMaintenance($message){
 //        $pdo = pdoSqlConnect();

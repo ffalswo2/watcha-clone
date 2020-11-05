@@ -205,26 +205,6 @@ try {
             echo json_encode($res, JSON_NUMERIC_CHECK);
             break;
 
-        case "searchVidByCategory":
-            http_response_code(200);
-
-            $keyword = $_GET['keyword'];
-
-            if (!isValidGenreIdx($keyword)) {
-                $res->isSuccess = FALSE;
-                $res->code = 222;
-                $res->message = "유효하지 않은 장르 idx입니다";
-                echo json_encode($res, JSON_NUMERIC_CHECK);
-                break;
-            }
-
-            $res->result = searchVidByCategory($keyword);
-            $res->isSuccess = TRUE;
-            $res->code = 100;
-            $res->message = "영상 카테고리 검색 성공";
-            echo json_encode($res, JSON_NUMERIC_CHECK);
-            break;
-
         case "getGenreIdx":
             http_response_code(200);
 
@@ -678,6 +658,16 @@ try {
             $res->isSuccess = TRUE;
             $res->code = 110;
             $res->message = "특정 드라마 정보 조회 성공";
+            echo json_encode($res, JSON_NUMERIC_CHECK);
+            break;
+
+        case "getCountryIdx":
+            http_response_code(200);
+
+            $res->result = getCountryIdx();
+            $res->isSuccess = TRUE;
+            $res->code = 100;
+            $res->message = "국가 idx 불러오기 성공";
             echo json_encode($res, JSON_NUMERIC_CHECK);
             break;
 

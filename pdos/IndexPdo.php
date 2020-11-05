@@ -534,24 +534,28 @@ function getMovieInfo($videoIdx) {
 
         $query1 = "select videoUrl,
        round((select avg(rating) from rating where rating.videoIdx = video.idx and rating.isDeleted = 'N'),
-             1)                                                                         as ratingAvg,
+             1)                                                                                               as ratingAvg,
        videoName,
-       case when ageGrade > 18 then concat('청불') else concat(ageGrade, '세') end         as ageGrade,
+       case
+           when ageGrade > 18 then concat('청불')
+           else concat(ageGrade, '세') end                                                                     as ageGrade,
        case
            when video.time is null then concat('에피소드 ', (select count(*) from episode where episode.videoIdx = ?), '개')
            when video.time > 60 then concat(video.time div 60, '시간', video.time % 60, '분')
-           when video.time < 60 then concat(video.time, '분') end                        as timeOrEpisode,
+           when video.time < 60
+               then concat(video.time, '분') end                                                               as timeOrEpisode,
        summary,
        director,
        actors,
-       concat(group_concat(genre.genreTitle), ' / ', country, ' / ', concat(year, '년')) as outline
+       concat(group_concat(distinct genre.genreTitle), ' / ', group_concat(distinct country.country), ' / ', concat(year, '년')) as outline
 from video
          left join episode on episode.videoIdx = video.idx
          left join genreVideo on genreVideo.videoIdx = video.idx
          left join genre on genreVideo.genreIdx = genre.idx
-         left join review on review.videoIdx = video.idx
+         left join countryVideo on countryVideo.videoIdx = video.idx
+         left join country on countryVideo.countryIdx = country.idx
 where video.idx = ?
-group by time;";
+group by videoName;";
 
         $st = $pdo->prepare($query1);
         $st->execute([$videoIdx,$videoIdx]);
@@ -610,24 +614,28 @@ function getDramaInfo($videoIdx) {
 
         $query1 = "select videoUrl,
        round((select avg(rating) from rating where rating.videoIdx = video.idx and rating.isDeleted = 'N'),
-             1)                                                                         as ratingAvg,
+             1)                                                                                               as ratingAvg,
        videoName,
-       case when ageGrade > 18 then concat('청불') else concat(ageGrade, '세') end         as ageGrade,
+       case
+           when ageGrade > 18 then concat('청불')
+           else concat(ageGrade, '세') end                                                                     as ageGrade,
        case
            when video.time is null then concat('에피소드 ', (select count(*) from episode where episode.videoIdx = ?), '개')
            when video.time > 60 then concat(video.time div 60, '시간', video.time % 60, '분')
-           when video.time < 60 then concat(video.time, '분') end                        as timeOrEpisode,
+           when video.time < 60
+               then concat(video.time, '분') end                                                               as timeOrEpisode,
        summary,
        director,
        actors,
-       concat(group_concat(genre.genreTitle), ' / ', country, ' / ', concat(year, '년')) as outline
+       concat(group_concat(distinct genre.genreTitle), ' / ', group_concat(distinct country.country), ' / ', concat(year, '년')) as outline
 from video
          left join episode on episode.videoIdx = video.idx
          left join genreVideo on genreVideo.videoIdx = video.idx
          left join genre on genreVideo.genreIdx = genre.idx
-         left join review on review.videoIdx = video.idx
+         left join countryVideo on countryVideo.videoIdx = video.idx
+         left join country on countryVideo.countryIdx = country.idx
 where video.idx = ?
-group by time;";
+group by videoName;";
 
         $st = $pdo->prepare($query1);
         $st->execute([$videoIdx,$videoIdx]);
@@ -672,6 +680,23 @@ where episode.videoIdx = ?;";
         $pdo->rollback();
     }
 
+}
+
+function getCountryIdx()
+{
+    $pdo = pdoSqlConnect();
+    $query = "select * from country;";
+
+    $st = $pdo->prepare($query);
+    //    $st->execute([$param,$param]);
+    $st->execute();
+    $st->setFetchMode(PDO::FETCH_ASSOC);
+    $res = $st->fetchAll();
+
+    $st = null;
+    $pdo = null;
+
+    return $res;
 }
 
 // CREATE

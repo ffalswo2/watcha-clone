@@ -699,6 +699,26 @@ function getCountryIdx()
     return $res;
 }
 
+function getFavVideos($profileIdxInToken) {
+    $pdo = pdoSqlConnect();
+    $query = "select posterImage, videoName
+from bannedVideo
+         left join video on bannedVideo.videoIdx = video.idx
+where bannedVideo.profileIdx = ?
+  and bannedVideo.status = 'L';";
+
+    $st = $pdo->prepare($query);
+    $st->execute([$profileIdxInToken]);
+    //    $st->execute();
+    $st->setFetchMode(PDO::FETCH_ASSOC);
+    $res = $st->fetchAll();
+
+    $st = null;
+    $pdo = null;
+
+    return $res;
+}
+
 // CREATE
 //    function addMaintenance($message){
 //        $pdo = pdoSqlConnect();

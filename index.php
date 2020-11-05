@@ -42,6 +42,8 @@ $dispatcher = FastRoute\simpleDispatcher(function (FastRoute\RouteCollector $r) 
     $r->addRoute('DELETE', '/video/{video-idx}/rate', ['IndexController', 'deleteRate']); // 별점 평가하기 취소하기
     $r->addRoute('GET', '/videos/{video-idx}', ['IndexController', 'getVideoInfo']); // 특정 영상 정보 조회
     $r->addRoute('GET', '/country', ['IndexController', 'getCountryIdx']); // 국가 idx 조회
+    $r->addRoute('GET', '/user/fav-videos', ['IndexController', 'getFavVideos']); // 보고싶어요 표시한 영상 조회
+//    $r->addRoute('GET', '/videos/{video-idx}/video-url', ['IndexController', 'playVideo']); // 동영상 재생
 
 
 

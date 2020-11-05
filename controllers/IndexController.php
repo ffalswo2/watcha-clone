@@ -671,6 +671,29 @@ try {
             echo json_encode($res, JSON_NUMERIC_CHECK);
             break;
 
+        case "getFavVideos":
+            http_response_code(200);
+
+            $jwt = $_SERVER['HTTP_X_ACCESS_TOKEN'];
+            $userIdxInToken = getDataByJWToken($jwt,JWT_SECRET_KEY)->userIdx;
+            $profileIdxInToken = getDataByJWToken($jwt,JWT_SECRET_KEY)->profileIdx;
+
+            if (!isValidJWT($jwt,JWT_SECRET_KEY)) {
+                $res->isSuccess = FALSE;
+                $res->code = 202;
+                $res->message = "유효하지 않은 토큰입니다";
+                echo json_encode($res, JSON_NUMERIC_CHECK);
+                addErrorLogs($errorLogs, $res, $req);
+                return;
+            }
+
+            $res->result = getFavVideos($profileIdxInToken);
+            $res->isSuccess = TRUE;
+            $res->code = 100;
+            $res->message = "유저가 보고싶어요 표시한 영상 조회";
+            echo json_encode($res, JSON_NUMERIC_CHECK);
+            break;
+
 
     }
 } catch (\Exception $e) {

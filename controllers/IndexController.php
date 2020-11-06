@@ -694,6 +694,336 @@ try {
             echo json_encode($res, JSON_NUMERIC_CHECK);
             break;
 
+        case "playVideo":
+            http_response_code(200);
+
+            $jwt = $_SERVER['HTTP_X_ACCESS_TOKEN'];
+            $userIdxInToken = getDataByJWToken($jwt,JWT_SECRET_KEY)->userIdx;
+            $profileIdxInToken = getDataByJWToken($jwt,JWT_SECRET_KEY)->profileIdx;
+
+            if (!isValidJWT($jwt,JWT_SECRET_KEY)) {
+                $res->isSuccess = FALSE;
+                $res->code = 202;
+                $res->message = "유효하지 않은 토큰입니다";
+                echo json_encode($res, JSON_NUMERIC_CHECK);
+                addErrorLogs($errorLogs, $res, $req);
+                return;
+            }
+
+            if (empty($_GET['video']) and empty($_GET['episode']))  {
+                $res->isSuccess = FALSE;
+                $res->code = 250;
+                $res->message = "video,episode 둘 중 하나는 입력해주셔야 합니다";
+                echo json_encode($res, JSON_NUMERIC_CHECK);
+                break;
+            }
+
+//            if (!empty($_GET['video']) and !empty($_GET['episode']))  {
+//                $res->isSuccess = FALSE;
+//                $res->code = 260;
+//                $res->message = "videoIdx,episodeIdx 둘 중 하나만 입력해주셔야 합니다";
+//                echo json_encode($res, JSON_NUMERIC_CHECK);
+//                break;
+//            }
+
+            $videoIdx = $_GET['video'];
+            $episodeIdx = $_GET['episode'];
+
+            if (!isset($episodeIdx)) { //영화를 볼때
+
+                if (!is_numeric($videoIdx)) {
+                    $res->isSuccess = FALSE;
+                    $res->code = 212;
+                    $res->message = "videoIdx 타입이 틀립니다";
+                    echo json_encode($res, JSON_NUMERIC_CHECK);
+                    break;
+                }
+
+                if (!isValidVideoIdx($videoIdx)) {
+                    $res->isSuccess = FALSE;
+                    $res->code = 222;
+                    $res->message = "유효하지 않은 비디오 idx입니다";
+                    echo json_encode($res, JSON_NUMERIC_CHECK);
+                    break;
+                }
+
+                if (!isMovie($videoIdx)) {
+                    $res->isSuccess = FALSE;
+                    $res->code = 430;
+                    $res->message = "해당 영상은 영화가 아닙니다";
+                    echo json_encode($res, JSON_NUMERIC_CHECK);
+                    break;
+                }
+
+                if (checkProfileVideoWatch($profileIdxInToken,$videoIdx)) {
+                    $res->result = playMovieWithoutInsert($videoIdx)[0];
+                    $res->isSuccess = TRUE;
+                    $res->code = 110;
+                    $res->message = "영화 URL 불러오기 성공(영상 재생)";
+                    echo json_encode($res, JSON_NUMERIC_CHECK);
+                    break;
+                }
+
+                $res->result = playMovie($profileIdxInToken,$videoIdx)[0];
+                $res->isSuccess = TRUE;
+                $res->code = 110;
+                $res->message = "영화 URL 불러오기 성공(영상 재생)";
+                echo json_encode($res, JSON_NUMERIC_CHECK);
+                break;
+            }
+
+            if (!is_numeric($videoIdx)) {
+                $res->isSuccess = FALSE;
+                $res->code = 212;
+                $res->message = "videoIdx 타입이 틀립니다";
+                echo json_encode($res, JSON_NUMERIC_CHECK);
+                break;
+            }
+
+            if (!isValidVideoIdx($videoIdx)) {
+                $res->isSuccess = FALSE;
+                $res->code = 222;
+                $res->message = "유효하지 않은 비디오 idx입니다";
+                echo json_encode($res, JSON_NUMERIC_CHECK);
+                break;
+            }
+
+            if (!is_numeric($episodeIdx)) {
+                $res->isSuccess = FALSE;
+                $res->code = 213;
+                $res->message = "episodeIdx 타입이 틀립니다";
+                echo json_encode($res, JSON_NUMERIC_CHECK);
+                break;
+            }
+
+            if (!isValidEpisodeIdx($episodeIdx)) {
+                $res->isSuccess = FALSE;
+                $res->code = 223;
+                $res->message = "유효하지 않은 episodeIdx입니다";
+                echo json_encode($res, JSON_NUMERIC_CHECK);
+                break;
+            }
+
+            if(!checkVideoEpisodeCorrect($videoIdx,$episodeIdx)) {
+                $res->isSuccess = FALSE;
+                $res->code = 310;
+                $res->message = "해당 드라마의 에피소드가 아닙니다";
+                echo json_encode($res, JSON_NUMERIC_CHECK);
+                break;
+            }
+
+            if (checkProfileEpisodeWatch($profileIdxInToken,$episodeIdx)) {
+                $res->result = playDramaWithoutInsert($episodeIdx)[0];
+                $res->isSuccess = TRUE;
+                $res->code = 100;
+                $res->message = "드라마 URL 불러오기 성공(영상 재생)";
+                echo json_encode($res, JSON_NUMERIC_CHECK);
+                break;
+            }
+
+            $res->result = playDrama($profileIdxInToken,$videoIdx,$episodeIdx)[0];
+            $res->isSuccess = TRUE;
+            $res->code = 100;
+            $res->message = "드라마 URL 불러오기 성공(영상 재생)";
+            echo json_encode($res, JSON_NUMERIC_CHECK);
+            break;
+
+
+
+        case "getVideoIdx":
+            http_response_code(200);
+
+            $res->result = getVideoIdx();
+            $res->isSuccess = TRUE;
+            $res->code = 100;
+            $res->message = "영상 idx 불러오기 성공";
+            echo json_encode($res, JSON_NUMERIC_CHECK);
+            break;
+
+        case "changeWatchTime":
+            http_response_code(200);
+
+            $jwt = $_SERVER['HTTP_X_ACCESS_TOKEN'];
+            $userIdxInToken = getDataByJWToken($jwt,JWT_SECRET_KEY)->userIdx;
+            $profileIdxInToken = getDataByJWToken($jwt,JWT_SECRET_KEY)->profileIdx;
+
+            if (!isValidJWT($jwt,JWT_SECRET_KEY)) {
+                $res->isSuccess = FALSE;
+                $res->code = 202;
+                $res->message = "유효하지 않은 토큰입니다";
+                echo json_encode($res, JSON_NUMERIC_CHECK);
+                addErrorLogs($errorLogs, $res, $req);
+                return;
+            }
+
+            if (!isset($req->watchTime) or empty($req->watchTime)==true) {
+                $res->isSuccess = FALSE;
+                $res->code = 221;
+                $res->message = "watchTime을 입력해주세요";
+                echo json_encode($res, JSON_NUMERIC_CHECK);
+                break;
+            }
+
+            if (empty($req->videoIdx) and empty($req->episodeIdx))  {
+                $res->isSuccess = FALSE;
+                $res->code = 250;
+                $res->message = "videoIdx,episodeIdx 둘 중 하나는 입력해주셔야 합니다";
+                echo json_encode($res, JSON_NUMERIC_CHECK);
+                break;
+            }
+
+//            if (!empty($req->videoIdx) and !empty($req->episodeIdx))  {
+//                $res->isSuccess = FALSE;
+//                $res->code = 260;
+//                $res->message = "videoIdx,episodeIdx 둘 중 하나만 입력해주셔야 합니다";
+//                echo json_encode($res, JSON_NUMERIC_CHECK);
+//                break;
+//            }
+
+            $watchTime = $req->watchTime;
+            $videoIdx = $req->videoIdx;
+            $episodeIdx = $req->episodeIdx;
+
+            if (!is_numeric($watchTime)) {
+                $res->isSuccess = FALSE;
+                $res->code = 213;
+                $res->message = "watchTime 타입이 틀립니다";
+                echo json_encode($res, JSON_NUMERIC_CHECK);
+                break;
+            }
+
+            if (!isset($episodeIdx)) { //영화를 볼때
+
+                if (!is_numeric($videoIdx)) {
+                    $res->isSuccess = FALSE;
+                    $res->code = 212;
+                    $res->message = "videoIdx 타입이 틀립니다";
+                    echo json_encode($res, JSON_NUMERIC_CHECK);
+                    break;
+                }
+
+                if (!isValidVideoIdx($videoIdx)) {
+                    $res->isSuccess = FALSE;
+                    $res->code = 222;
+                    $res->message = "유효하지 않은 비디오 idx입니다";
+                    echo json_encode($res, JSON_NUMERIC_CHECK);
+                    break;
+                }
+
+                if (!checkProfileVideoWatch($profileIdxInToken,$videoIdx)) {
+                    $res->isSuccess = FALSE;
+                    $res->code = 390;
+                    $res->message = "시청중인 영화가 아닙니다";
+                    echo json_encode($res, JSON_NUMERIC_CHECK);
+                    break;
+                }
+
+                if (isMovie($videoIdx)-10 <= $watchTime/60 ) {
+
+                    moveMovieToHistory($profileIdxInToken,$videoIdx);
+                    $res->isSuccess = TRUE;
+                    $res->code = 120;
+                    $res->message = "영화를 모두 시청했습니다";
+                    echo json_encode($res, JSON_NUMERIC_CHECK);
+                    break;
+                }
+
+                changeMovieWatchTime($watchTime,$profileIdxInToken,$videoIdx);
+                $res->isSuccess = TRUE;
+                $res->code = 110;
+                $res->message = "영화 시청시간 수정 성공";
+                echo json_encode($res, JSON_NUMERIC_CHECK);
+                break;
+            }
+
+            if (!is_numeric($videoIdx)) { // 드라마를 볼 때
+                $res->isSuccess = FALSE;
+                $res->code = 212;
+                $res->message = "videoIdx 타입이 틀립니다";
+                echo json_encode($res, JSON_NUMERIC_CHECK);
+                break;
+            }
+
+            if (!isValidVideoIdx($videoIdx)) {
+                $res->isSuccess = FALSE;
+                $res->code = 222;
+                $res->message = "유효하지 않은 비디오 idx입니다";
+                echo json_encode($res, JSON_NUMERIC_CHECK);
+                break;
+            }
+
+            if (!is_numeric($episodeIdx)) {
+                $res->isSuccess = FALSE;
+                $res->code = 213;
+                $res->message = "episodeIdx 타입이 틀립니다";
+                echo json_encode($res, JSON_NUMERIC_CHECK);
+                break;
+            }
+
+            if (!isValidEpisodeIdx($episodeIdx)) {
+                $res->isSuccess = FALSE;
+                $res->code = 223;
+                $res->message = "유효하지 않은 episodeIdx입니다";
+                echo json_encode($res, JSON_NUMERIC_CHECK);
+                break;
+            }
+
+            if(!checkVideoEpisodeCorrect($videoIdx,$episodeIdx)) {
+                $res->isSuccess = FALSE;
+                $res->code = 310;
+                $res->message = "해당 드라마의 에피소드가 아닙니다";
+                echo json_encode($res, JSON_NUMERIC_CHECK);
+                break;
+            }
+
+            if (!checkProfileEpisodeWatch($profileIdxInToken,$episodeIdx)) {
+                $res->isSuccess = FALSE;
+                $res->code = 380;
+                $res->message = "시청중인 드라마가 아닙니다";
+                echo json_encode($res, JSON_NUMERIC_CHECK);
+                break;
+            }
+
+            if (getLastEpisodeIdx($videoIdx)== $episodeIdx and getEpisodeTime($episodeIdx)-3 <= $watchTime/60) {
+
+                moveDramaToHistory($profileIdxInToken,$videoIdx,$episodeIdx);
+                $res->isSuccess = TRUE;
+                $res->code = 150;
+                $res->message = "드라마를 모두 시청했습니다";
+                echo json_encode($res, JSON_NUMERIC_CHECK);
+                break;
+            }
+
+            changeDramaWatchTime($watchTime,$profileIdxInToken,$episodeIdx);
+            $res->isSuccess = TRUE;
+            $res->code = 100;
+            $res->message = "드라마 시청시간 수정 성공";
+            echo json_encode($res, JSON_NUMERIC_CHECK);
+            break;
+
+        case "getWatchingVideo":
+            http_response_code(200);
+
+            $jwt = $_SERVER['HTTP_X_ACCESS_TOKEN'];
+            $userIdxInToken = getDataByJWToken($jwt,JWT_SECRET_KEY)->userIdx;
+            $profileIdxInToken = getDataByJWToken($jwt,JWT_SECRET_KEY)->profileIdx;
+
+            if (!isValidJWT($jwt,JWT_SECRET_KEY)) {
+                $res->isSuccess = FALSE;
+                $res->code = 202;
+                $res->message = "유효하지 않은 토큰입니다";
+                echo json_encode($res, JSON_NUMERIC_CHECK);
+                addErrorLogs($errorLogs, $res, $req);
+                return;
+            }
+
+            $res->result = getWatchingVideo($profileIdxInToken);
+            $res->isSuccess = TRUE;
+            $res->code = 100;
+            $res->message = "시청중인 영상 조회 성공";
+            echo json_encode($res, JSON_NUMERIC_CHECK);
+            break;
+
 
     }
 } catch (\Exception $e) {

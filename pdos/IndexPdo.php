@@ -657,7 +657,7 @@ group by videoName;";
         $st->setFetchMode(PDO::FETCH_ASSOC);
         $res['review'] = $st->fetchAll();
 
-        $query4 = "select episodeUrl, concat('에피소드 ',episodeNum) as episodeNum, episodeTitle,
+        $query4 = "select idx as episodeIdx,episodeUrl, concat('에피소드 ',episodeNum) as episodeNum, episodeTitle,
        case when episodeTime > 60 then concat(episodeTime div 60, '시간', episodeTime % 60, '분')
            when episodeTime < 60 then concat(episodeTime, '분') end                        as episodeTime
 from episode
@@ -717,6 +717,353 @@ where bannedVideo.profileIdx = ?
     $pdo = null;
 
     return $res;
+}
+
+function playMovie($profileIdxInToken,$videoIdx) {
+    try {
+        $pdo = pdoSqlConnect();
+
+        $pdo->beginTransaction();
+
+        $query1 = "INSERT INTO watchingVideo (profileIdx, videoIdx)
+VALUES (?, ?);";
+
+        $st = $pdo->prepare($query1);
+        $st->execute([$profileIdxInToken,$videoIdx]);
+
+        $query2 = "select videoUrl,watchTime
+from video left join watchingVideo on watchingVideo.videoIdx = video.idx
+where video.idx = ?;";
+
+        $st = $pdo->prepare($query2);
+        $st->execute([$videoIdx]);
+        //    $st->execute();
+        $st->setFetchMode(PDO::FETCH_ASSOC);
+        $res = $st->fetchAll();
+
+        $pdo->commit();
+
+        $st = null;
+        $pdo = null;
+
+        return $res;
+    }
+    catch (Exception $e) {
+        echo $e->getMessage();
+        $pdo->rollback();
+    }
+
+}
+
+function playMovieWithoutInsert($videoIdx)
+{
+    $pdo = pdoSqlConnect();
+    $query = "select videoUrl,watchTime
+from video left join watchingVideo on watchingVideo.videoIdx = video.idx
+where video.idx = ?;";
+
+    $st = $pdo->prepare($query);
+    //    $st->execute([$param,$param]);
+    $st->execute([$videoIdx]);
+    $st->setFetchMode(PDO::FETCH_ASSOC);
+    $res = $st->fetchAll();
+
+    $st = null;
+    $pdo = null;
+
+    return $res;
+}
+
+function playDramaWithoutInsert($episodeIdx)
+{
+    $pdo = pdoSqlConnect();
+    $query = "select episodeUrl, watchTime
+from episode
+         left join watchingVideo on watchingVideo.episodeIdx = episode.idx
+where episode.idx = ?;";
+
+    $st = $pdo->prepare($query);
+    //    $st->execute([$param,$param]);
+    $st->execute([$episodeIdx]);
+    $st->setFetchMode(PDO::FETCH_ASSOC);
+    $res = $st->fetchAll();
+
+    $st = null;
+    $pdo = null;
+
+    return $res;
+}
+
+function playDrama($profileIdxInToken,$videoIdx,$episodeIdx) {
+    try {
+        $pdo = pdoSqlConnect();
+
+        $pdo->beginTransaction();
+
+        $query1 = "INSERT INTO watchingVideo (profileIdx,videoIdx,episodeIdx)
+VALUES (?,?,?);";
+
+        $st = $pdo->prepare($query1);
+        $st->execute([$profileIdxInToken,$videoIdx,$episodeIdx]);
+
+        $query2 = "select episodeUrl, watchTime
+from episode
+         left join watchingVideo on watchingVideo.episodeIdx = episode.idx
+where episode.idx = ?;";
+
+        $st = $pdo->prepare($query2);
+        $st->execute([$episodeIdx]);
+        //    $st->execute();
+        $st->setFetchMode(PDO::FETCH_ASSOC);
+        $res = $st->fetchAll();
+
+        $pdo->commit();
+
+        $st = null;
+        $pdo = null;
+
+        return $res;
+    }
+    catch (Exception $e) {
+        echo $e->getMessage();
+        $pdo->rollback();
+    }
+
+}
+
+function isValidEpisodeIdx($episodeIdx)
+{
+    $pdo = pdoSqlConnect();
+    $query = "select EXISTS(select * from episode where idx = ?) exist;";
+
+    $st = $pdo->prepare($query);
+    $st->execute([$episodeIdx]);
+    //    $st->execute();
+    $st->setFetchMode(PDO::FETCH_ASSOC);
+    $res = $st->fetchAll();
+
+    $st = null;
+    $pdo = null;
+
+    return $res[0]['exist'];
+}
+
+function checkVideoEpisodeCorrect($videoIdx,$episodeIdx)
+{
+    $pdo = pdoSqlConnect();
+    $query = "select EXISTS(select * from episode where videoIdx = ? and idx = ?) exist;";
+
+    $st = $pdo->prepare($query);
+    $st->execute([$videoIdx,$episodeIdx]);
+    //    $st->execute();
+    $st->setFetchMode(PDO::FETCH_ASSOC);
+    $res = $st->fetchAll();
+
+    $st = null;
+    $pdo = null;
+
+    return $res[0]['exist'];
+}
+
+function checkProfileVideoWatch($profileIdxInToken,$videoIdx)
+{
+    $pdo = pdoSqlConnect();
+    $query = "select EXISTS(select * from watchingVideo where profileIdx = ? and videoIdx = ?) exist;";
+
+    $st = $pdo->prepare($query);
+    $st->execute([$profileIdxInToken,$videoIdx]);
+    //    $st->execute();
+    $st->setFetchMode(PDO::FETCH_ASSOC);
+    $res = $st->fetchAll();
+
+    $st = null;
+    $pdo = null;
+
+    return $res[0]['exist'];
+}
+
+function checkProfileEpisodeWatch($profileIdxInToken,$episodeIdx)
+{
+    $pdo = pdoSqlConnect();
+    $query = "select EXISTS(select * from watchingVideo where profileIdx = ? and episodeIdx = ? and isDeleted = 'N') exist;";
+
+    $st = $pdo->prepare($query);
+    $st->execute([$profileIdxInToken,$episodeIdx]);
+    //    $st->execute();
+    $st->setFetchMode(PDO::FETCH_ASSOC);
+    $res = $st->fetchAll();
+
+    $st = null;
+    $pdo = null;
+
+    return $res[0]['exist'];
+}
+
+function getVideoIdx()
+{
+    $pdo = pdoSqlConnect();
+    $query = "select idx,videoName from video;";
+
+    $st = $pdo->prepare($query);
+    //    $st->execute([$param,$param]);
+    $st->execute();
+    $st->setFetchMode(PDO::FETCH_ASSOC);
+    $res = $st->fetchAll();
+
+    $st = null;
+    $pdo = null;
+
+    return $res;
+}
+
+function changeMovieWatchTime($watchTime,$profileIdxInToken,$videoIdx) {
+    $pdo = pdoSqlConnect();
+    $query = "UPDATE watchingVideo SET watchTime = ? where profileIdx = ? and videoIdx = ?;";
+
+    $st = $pdo->prepare($query);
+    $st->execute([$watchTime,$profileIdxInToken,$videoIdx]);
+
+    $st = null;
+    $pdo = null;
+
+}
+
+function changeDramaWatchTime($watchTime,$profileIdxInToken,$episodeIdx) {
+    $pdo = pdoSqlConnect();
+    $query = "UPDATE watchingVideo SET watchTime = ? where profileIdx = ? and episodeIdx = ?;";
+
+    $st = $pdo->prepare($query);
+    $st->execute([$watchTime,$profileIdxInToken,$episodeIdx]);
+
+    $st = null;
+    $pdo = null;
+
+}
+
+function isMovie($videoIdx) {
+    $pdo = pdoSqlConnect();
+    $query = "SELECT `time` FROM video WHERE idx = ?;";
+
+    $st = $pdo->prepare($query);
+    $st->execute([$videoIdx]);
+    //    $st->execute();
+    $st->setFetchMode(PDO::FETCH_ASSOC);
+    $res = $st->fetchAll();
+
+    $st = null;
+    $pdo = null;
+
+    return $res[0]['time'];
+}
+
+function getWatchingVideo($profileIdxInToken)
+{
+    $pdo = pdoSqlConnect();
+    $query = "select posterImage,case when episodeNum is null then videoName else concat(videoName,':에피소드 ',episodeNum) end as watchingTitle,watchTime
+from watchingVideo
+         left join video on watchingVideo.videoIdx = video.idx
+         left join profile on watchingVideo.profileIdx = profile.idx
+         left join episode on watchingVideo.episodeIdx = episode.idx
+where profile.idx = ? and watchingVideo.isDeleted = 'N';";
+
+    $st = $pdo->prepare($query);
+    //    $st->execute([$param,$param]);
+    $st->execute([$profileIdxInToken]);
+    $st->setFetchMode(PDO::FETCH_ASSOC);
+    $res = $st->fetchAll();
+
+    $st = null;
+    $pdo = null;
+
+    return $res;
+}
+
+function getLastEpisodeIdx($videoIdx) {
+    $pdo = pdoSqlConnect();
+    $query = "select max(idx) as idx from episode where videoIdx = ?;";
+
+    $st = $pdo->prepare($query);
+    $st->execute([$videoIdx]);
+    //    $st->execute();
+    $st->setFetchMode(PDO::FETCH_ASSOC);
+    $res = $st->fetchAll();
+
+    $st = null;
+    $pdo = null;
+
+    return $res[0]['idx'];
+}
+
+function getEpisodeTime($episodeIdx) {
+    $pdo = pdoSqlConnect();
+    $query = "select episodeTime from episode where episode.idx = ?;";
+
+    $st = $pdo->prepare($query);
+    $st->execute([$episodeIdx]);
+    //    $st->execute();
+    $st->setFetchMode(PDO::FETCH_ASSOC);
+    $res = $st->fetchAll();
+
+    $st = null;
+    $pdo = null;
+
+    return $res[0]['episodeTime'];
+}
+
+function moveMovieToHistory($profileIdxInToken,$videoIdx) {
+    try {
+        $pdo = pdoSqlConnect();
+
+        $pdo->beginTransaction();
+
+        $query1 = "UPDATE watchingVideo SET isDeleted = 'Y' where profileIdx = ? and videoIdx = ?;";
+
+        $st = $pdo->prepare($query1);
+        $st->execute([$profileIdxInToken,$videoIdx]);
+
+        $query2 = "INSERT INTO history (profileIdx,videoIdx) VALUES (?,?);";
+
+        $st = $pdo->prepare($query2);
+        $st->execute([$profileIdxInToken,$videoIdx]);
+
+        $pdo->commit();
+
+        $st = null;
+        $pdo = null;
+    }
+    catch (Exception $e) {
+        echo $e->getMessage();
+        $pdo->rollback();
+    }
+
+}
+
+function moveDramaToHistory($profileIdxInToken,$videoIdx,$episodeIdx) {
+    try {
+        $pdo = pdoSqlConnect();
+
+        $pdo->beginTransaction();
+
+        $query1 = "UPDATE watchingVideo SET isDeleted = 'Y' where profileIdx = ? and videoIdx = ? and episodeIdx = ?;";
+
+        $st = $pdo->prepare($query1);
+        $st->execute([$profileIdxInToken,$videoIdx,$episodeIdx]);
+
+        $query2 = "INSERT INTO history (profileIdx,videoIdx) VALUES (?,?);";
+
+        $st = $pdo->prepare($query2);
+        $st->execute([$profileIdxInToken,$videoIdx]);
+
+        $pdo->commit();
+
+        $st = null;
+        $pdo = null;
+    }
+    catch (Exception $e) {
+        echo $e->getMessage();
+        $pdo->rollback();
+    }
+
 }
 
 // CREATE

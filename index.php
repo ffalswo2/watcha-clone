@@ -31,7 +31,7 @@ $dispatcher = FastRoute\simpleDispatcher(function (FastRoute\RouteCollector $r) 
     $r->addRoute('POST', '/naver/login', ['JWTController', 'naverLogin']); // 네이버 로그인
     $r->addRoute('GET', '/videos', ['IndexController', 'getVideos']); // 유저 기반 모든 영상 조회 (평가하기)
     $r->addRoute('GET', '/genre', ['IndexController', 'getGenreIdx']); // 장르 idx 조회
-    $r->addRoute('GET', '/videos/category-country', ['SearchController', 'searchVidByCategory']); // 카테고리별로 영상 검색
+    $r->addRoute('GET', '/videos/genre-country', ['SearchController', 'searchVidByCategory']); // 카테고리별로 영상 검색
     $r->addRoute('PATCH', '/video/{video-idx}/not-good', ['IndexController', 'banVideo']); // 특정 영상 관심없어요 추가/삭제
     $r->addRoute('PATCH', '/video/{video-idx}/good', ['IndexController', 'likeVideo']); // 특정 영상 보고싶어요 추가/삭제
     $r->addRoute('POST', '/video/{video-idx}/rate', ['IndexController', 'rateWithStar']); // 별점 평가하기
@@ -43,7 +43,11 @@ $dispatcher = FastRoute\simpleDispatcher(function (FastRoute\RouteCollector $r) 
     $r->addRoute('GET', '/videos/{video-idx}', ['IndexController', 'getVideoInfo']); // 특정 영상 정보 조회
     $r->addRoute('GET', '/country', ['IndexController', 'getCountryIdx']); // 국가 idx 조회
     $r->addRoute('GET', '/user/fav-videos', ['IndexController', 'getFavVideos']); // 보고싶어요 표시한 영상 조회
-//    $r->addRoute('GET', '/videos/{video-idx}/video-url', ['IndexController', 'playVideo']); // 동영상 재생
+    $r->addRoute('GET', '/video/url', ['IndexController', 'playVideo']); // 동영상 재생
+    $r->addRoute('GET', '/video-idx', ['IndexController', 'getVideoIdx']); // 영상 idx 조회
+    $r->addRoute('PATCH', '/watching-video', ['IndexController', 'changeWatchTime']); // 시청 시간 보내기
+    $r->addRoute('GET', '/watching-video', ['IndexController', 'getWatchingVideo']); // 시청중인 영상 조회
+
 
 
 

@@ -1066,6 +1066,63 @@ function moveDramaToHistory($profileIdxInToken,$videoIdx,$episodeIdx) {
 
 }
 
+function getHistory($profileIdxInToken)
+{
+    $pdo = pdoSqlConnect();
+    $query = "select posterImage,videoName from video left join history on history.videoIdx = video.idx where history.profileIdx = ?;";
+
+    $st = $pdo->prepare($query);
+    //    $st->execute([$param,$param]);
+    $st->execute([$profileIdxInToken]);
+    $st->setFetchMode(PDO::FETCH_ASSOC);
+    $res = $st->fetchAll();
+
+    $st = null;
+    $pdo = null;
+
+    return $res;
+}
+
+function deleteHistory($videoIdx,$profileIdxInToken) {
+    $pdo = pdoSqlConnect();
+    $query = "update history set isDeleted = 'Y' where history.videoIdx = ? and history.profileIdx = ?;";
+
+    $st = $pdo->prepare($query);
+    $st->execute([$videoIdx,$profileIdxInToken]);
+
+    $st = null;
+    $pdo = null;
+
+}
+
+function deleteWatchingVideo($videoIdx,$profileIdxInToken) {
+    $pdo = pdoSqlConnect();
+    $query = "UPDATE watchingVideo SET isDeleted = 'Y' where profileIdx = ? and videoIdx = ?;";
+
+    $st = $pdo->prepare($query);
+    $st->execute([$videoIdx,$profileIdxInToken]);
+
+    $st = null;
+    $pdo = null;
+
+}
+
+function checkProfileHistory($profileIdxInToken,$value) {
+    $pdo = pdoSqlConnect();
+    $query = "select exists(select profileIdx,videoIdx from history where profileIdx = ? and videoIdx = ?) as exist;";
+
+    $st = $pdo->prepare($query);
+    $st->execute([$profileIdxInToken,$value]);
+    //    $st->execute();
+    $st->setFetchMode(PDO::FETCH_ASSOC);
+    $res = $st->fetchAll();
+
+    $st = null;
+    $pdo = null;
+
+    return $res[0]['exist'];
+}
+
 // CREATE
 //    function addMaintenance($message){
 //        $pdo = pdoSqlConnect();

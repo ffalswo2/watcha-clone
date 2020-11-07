@@ -1024,6 +1024,186 @@ try {
             echo json_encode($res, JSON_NUMERIC_CHECK);
             break;
 
+        case "getHistory":
+            http_response_code(200);
+
+            $jwt = $_SERVER['HTTP_X_ACCESS_TOKEN'];
+            $userIdxInToken = getDataByJWToken($jwt,JWT_SECRET_KEY)->userIdx;
+            $profileIdxInToken = getDataByJWToken($jwt,JWT_SECRET_KEY)->profileIdx;
+
+            if (!isValidJWT($jwt,JWT_SECRET_KEY)) {
+                $res->isSuccess = FALSE;
+                $res->code = 202;
+                $res->message = "유효하지 않은 토큰입니다";
+                echo json_encode($res, JSON_NUMERIC_CHECK);
+                addErrorLogs($errorLogs, $res, $req);
+                return;
+            }
+
+            $res->result = getHistory($profileIdxInToken);
+            $res->isSuccess = TRUE;
+            $res->code = 100;
+            $res->message = "다 본 작품 조회 성공";
+            echo json_encode($res, JSON_NUMERIC_CHECK);
+            break;
+
+        case "deleteHistory":
+            http_response_code(200);
+
+            $jwt = $_SERVER['HTTP_X_ACCESS_TOKEN'];
+            $userIdxInToken = getDataByJWToken($jwt,JWT_SECRET_KEY)->userIdx;
+            $profileIdxInToken = getDataByJWToken($jwt,JWT_SECRET_KEY)->profileIdx;
+
+            if (!isValidJWT($jwt,JWT_SECRET_KEY)) {
+                $res->isSuccess = FALSE;
+                $res->code = 202;
+                $res->message = "유효하지 않은 토큰입니다";
+                echo json_encode($res, JSON_NUMERIC_CHECK);
+                addErrorLogs($errorLogs, $res, $req);
+                return;
+            }
+
+            if (!isset($req->videoIdx) or empty($req->videoIdx)==true) {
+                $res->isSuccess = FALSE;
+                $res->code = 221;
+                $res->message = "videoIdx를 입력해주세요";
+                echo json_encode($res, JSON_NUMERIC_CHECK);
+                break;
+            }
+
+            $videoIdx = $req->videoIdx;
+            $errorArr = array();
+
+            foreach ($videoIdx as $value) {
+
+                if (!is_numeric($value)) {
+                    array_push($errorArr,1);
+                    break;
+                }
+                if (!isValidVideoIdx($value)) {
+                    array_push($errorArr,2);
+                    break;
+                }
+
+                if (!checkProfileHistory($profileIdxInToken,$value)) {
+                    array_push($errorArr,3);
+                    break;
+                }
+            }
+
+            if (in_array(1,$errorArr)) {
+                $res->isSuccess = FALSE;
+                $res->code = 249;
+                $res->message = "틀린 videoIdx 타입이 포함되어 있습니다";
+                echo json_encode($res, JSON_NUMERIC_CHECK);
+                break;
+            }
+
+            if (in_array(2,$errorArr)) {
+                $res->isSuccess = FALSE;
+                $res->code = 248;
+                $res->message = "유효하지않은 videoIdx가 포함되어 있습니다";
+                echo json_encode($res, JSON_NUMERIC_CHECK);
+                break;
+            }
+
+            if (in_array(3,$errorArr)) {
+                $res->isSuccess = FALSE;
+                $res->code = 401;
+                $res->message = "다보지않은 video의 idx가 포함되어 있습니다";
+                echo json_encode($res, JSON_NUMERIC_CHECK);
+                break;
+            }
+
+            foreach ($videoIdx as $value) {
+                deleteHistory($value,$profileIdxInToken);
+            }
+
+            $res->isSuccess = TRUE;
+            $res->code = 100;
+            $res->message = "다 본 작품 항목 삭제 완료";
+            echo json_encode($res, JSON_NUMERIC_CHECK);
+            break;
+
+
+        case "deleteWatchingVideo":
+            http_response_code(200);
+
+            $jwt = $_SERVER['HTTP_X_ACCESS_TOKEN'];
+            $userIdxInToken = getDataByJWToken($jwt,JWT_SECRET_KEY)->userIdx;
+            $profileIdxInToken = getDataByJWToken($jwt,JWT_SECRET_KEY)->profileIdx;
+
+            if (!isValidJWT($jwt,JWT_SECRET_KEY)) {
+                $res->isSuccess = FALSE;
+                $res->code = 202;
+                $res->message = "유효하지 않은 토큰입니다";
+                echo json_encode($res, JSON_NUMERIC_CHECK);
+                addErrorLogs($errorLogs, $res, $req);
+                return;
+            }
+
+            if (!isset($req->videoIdx) or empty($req->videoIdx)==true) {
+                $res->isSuccess = FALSE;
+                $res->code = 221;
+                $res->message = "videoIdx를 입력해주세요";
+                echo json_encode($res, JSON_NUMERIC_CHECK);
+                break;
+            }
+
+            $videoIdx = $req->videoIdx;
+            $errorArr = array();
+
+            foreach ($videoIdx as $value) {
+
+                if (!is_numeric($value)) {
+                    array_push($errorArr,1);
+                    break;
+                }
+                if (!isValidVideoIdx($value)) {
+                    array_push($errorArr,2);
+                    break;
+                }
+
+                if (!checkProfileVideoWatch($profileIdxInToken,$value)) {
+                    array_push($errorArr,3);
+                    break;
+                }
+            }
+
+            if (in_array(1,$errorArr)) {
+                $res->isSuccess = FALSE;
+                $res->code = 249;
+                $res->message = "틀린 videoIdx 타입이 포함되어 있습니다";
+                echo json_encode($res, JSON_NUMERIC_CHECK);
+                break;
+            }
+
+            if (in_array(2,$errorArr)) {
+                $res->isSuccess = FALSE;
+                $res->code = 248;
+                $res->message = "유효하지않은 videoIdx가 포함되어 있습니다";
+                echo json_encode($res, JSON_NUMERIC_CHECK);
+                break;
+            }
+
+            if (in_array(3,$errorArr)) {
+                $res->isSuccess = FALSE;
+                $res->code = 401;
+                $res->message = "조회하지 않은 video의 idx가 포함되어 있습니다";
+                echo json_encode($res, JSON_NUMERIC_CHECK);
+                break;
+            }
+
+            foreach ($videoIdx as $value) {
+                deleteWatchingVideo($value,$profileIdxInToken);
+            }
+
+            $res->isSuccess = TRUE;
+            $res->code = 100;
+            $res->message = "이어보기 항목 삭제 완료";
+            echo json_encode($res, JSON_NUMERIC_CHECK);
+            break;
+
 
     }
 } catch (\Exception $e) {

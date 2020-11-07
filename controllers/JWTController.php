@@ -145,7 +145,13 @@ try {
                 echo json_encode($res, JSON_NUMERIC_CHECK);
                 break;
             } else {
-                echo "Error 내용:".$response;
+//                echo "Error 내용:".$response;
+                $res->result->$response;
+                $res->isSuccess = FALSE;
+                $res->code = 24;
+                $res->message = "인증 실패 오류";
+                echo json_encode($res, JSON_NUMERIC_CHECK);
+                break;
             }
 
 

@@ -47,6 +47,9 @@ $dispatcher = FastRoute\simpleDispatcher(function (FastRoute\RouteCollector $r) 
     $r->addRoute('GET', '/video-idx', ['IndexController', 'getVideoIdx']); // 영상 idx 조회
     $r->addRoute('PATCH', '/watching-video', ['IndexController', 'changeWatchTime']); // 시청 시간 보내기
     $r->addRoute('GET', '/watching-video', ['IndexController', 'getWatchingVideo']); // 시청중인 영상 조회
+    $r->addRoute('GET', '/history', ['IndexController', 'getHistory']); // 다 본 작품 조회하기
+    $r->addRoute('DELETE', '/history', ['IndexController', 'deleteHistory']); // 다 본 작품 항목 삭제하기
+    $r->addRoute('DELETE', '/watching-video', ['IndexController', 'deleteWatchingVideo']); // 이어보기 항목 삭제하기
 
 
 

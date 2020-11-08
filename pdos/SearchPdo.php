@@ -108,6 +108,28 @@ where country.idx = ?;";
     return $res;
 }
 
+function getPopularVideosByOrder() {
+    $pdo = pdoSqlConnect();
+    $query = "select posterImage, videoName
+from searchHistory
+         left join video on keyword = videoName
+where keyword = videoName
+group by keyword
+order by count(keyword) DESC
+limit 6;";
+
+    $st = $pdo->prepare($query);
+    $st->execute([]);
+    //    $st->execute();
+    $st->setFetchMode(PDO::FETCH_ASSOC);
+    $res = $st->fetchAll();
+
+    $st = null;
+    $pdo = null;
+
+    return $res;
+}
+
 // CREATE
 //    function addMaintenance($message){
 //        $pdo = pdoSqlConnect();

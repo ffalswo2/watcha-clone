@@ -70,141 +70,6 @@ try {
             echo json_encode($res, JSON_NUMERIC_CHECK);
             break;
 
-//        case "naverSignUp":
-//            http_response_code(200);
-//
-//            if (!isset($req->accessToken) or empty($req->accessToken)==true) {
-//                $res->isSuccess = FALSE;
-//                $res->code = 222;
-//                $res->message = "accessToken을 입력해주세요";
-//                echo json_encode($res, JSON_NUMERIC_CHECK);
-//                break;
-//            }
-//
-//            $accessToken = $req->accessToken;
-//
-//            if (is_numeric($accessToken)) {
-//                $res->isSuccess = FALSE;
-//                $res->code = 211;
-//                $res->message = "accessToken 타입이 틀립니다";
-//                echo json_encode($res, JSON_NUMERIC_CHECK);
-//                break;
-//            }
-//
-//            $token = $accessToken;
-//            $header = "Bearer ".$token; // Bearer 다음에 공백 추가
-//            $url = "https://openapi.naver.com/v1/nid/me";
-//            $is_post = false;
-//            $ch = curl_init();
-//            curl_setopt($ch, CURLOPT_URL, $url);
-//            curl_setopt($ch, CURLOPT_POST, $is_post);
-//            curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-//            $headers = array();
-//            $headers[] = "Authorization: ".$header;
-//            curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
-//            $response = curl_exec ($ch);
-//            $status_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-////            echo "status_code:".$status_code."<br>";
-//            curl_close ($ch);
-//            if($status_code == 200) {
-//                $profileResponse = json_decode($response);
-//
-//                $naverId = $profileResponse->response->id;
-//                $profileImg = $profileResponse->response->profile_image;
-//                $email = $profileResponse->response->email;
-//                $name = $profileResponse->response->name;
-//
-//                if (checkNaverUser($naverId,$email)) {
-//                    $res->isSuccess = FALSE;
-//                    $res->code = 219;
-//                    $res->message = "이미 등록된 유저입니다";
-//                    echo json_encode($res, JSON_NUMERIC_CHECK);
-//                    break;
-//                }
-//
-//                addNaverUser($naverId,$email,$name,$profileImg);
-//
-////                $res->result = getIdxNaverId($naverId);
-//                $res->isSuccess = TRUE;
-//                $res->code = 100;
-//                $res->message = "네이버 회원가입 성공";
-//                echo json_encode($res, JSON_NUMERIC_CHECK);
-//                break;
-//            } else {
-//                echo "Error 내용:".$response;
-//            }
-
-        case "getVideos":
-            http_response_code(200);
-
-            $jwt = $_SERVER['HTTP_X_ACCESS_TOKEN'];
-            $userIdxInToken = getDataByJWToken($jwt,JWT_SECRET_KEY)->userIdx;
-            $profileIdxInToken = getDataByJWToken($jwt,JWT_SECRET_KEY)->profileIdx;
-
-            if (!isValidJWT($jwt,JWT_SECRET_KEY)) {
-                $res->isSuccess = FALSE;
-                $res->code = 202;
-                $res->message = "유효하지 않은 토큰입니다";
-                echo json_encode($res, JSON_NUMERIC_CHECK);
-                addErrorLogs($errorLogs, $res, $req);
-                return;
-            }
-
-//            if (!isset($vars['profile-idx']) or empty($vars['profile-idx'])==true) {
-//                $res->isSuccess = FALSE;
-//                $res->code = 222;
-//                $res->message = "profileIdx를 입력해주세요";
-//                echo json_encode($res, JSON_NUMERIC_CHECK);
-//                break;
-//            }
-//
-//            $profileIdx = $vars['profile-idx'];
-//
-//            if (!is_numeric($profileIdx)) {
-//                $res->isSuccess = FALSE;
-//                $res->code = 211;
-//                $res->message = "profileIdx 타입이 틀립니다";
-//                echo json_encode($res, JSON_NUMERIC_CHECK);
-//                break;
-//            }
-//
-//            if (!checkUserIdProfileId($userIdxInToken,$profileIdx)) {
-//                $res->isSuccess = FALSE;
-//                $res->code = 208;
-//                $res->message = "다른 유저의 프로필입니다";
-//                echo json_encode($res, JSON_NUMERIC_CHECK);
-//                break;
-//            }
-//
-//            if (!isValidProfileIdx($profileIdx)) {
-//                $res->isSuccess = FALSE;
-//                $res->code = 200;
-//                $res->message = "유효하지 않은 프로필 idx입니다.";
-//                echo json_encode($res, JSON_NUMERIC_CHECK);
-//                break;
-//            }
-
-            $videos = getVideos($profileIdxInToken);
-
-            $ratingNum = $videos[0]['ratingNum'];
-            $resArr = [];
-            $resArr['ratingNum'] = $ratingNum;
-
-            for ($i=0;$i<count($videos);$i++) {
-                $resArr['videos'][$i]['posterImage'] = $videos[$i]['posterImage'];
-                $resArr['videos'][$i]['videoName'] = $videos[$i]['videoName'];
-                $resArr['videos'][$i]['year'] = $videos[$i]['year'];
-            }
-
-
-
-            $res->result = $resArr;
-            $res->isSuccess = TRUE;
-            $res->code = 100;
-            $res->message = "유저 기반 모든 영상 불러오기 성공";
-            echo json_encode($res, JSON_NUMERIC_CHECK);
-            break;
-
         case "getGenreIdx":
             http_response_code(200);
 
@@ -212,452 +77,6 @@ try {
             $res->isSuccess = TRUE;
             $res->code = 100;
             $res->message = "장르 idx 불러오기 성공";
-            echo json_encode($res, JSON_NUMERIC_CHECK);
-            break;
-
-        case "banVideo":
-            http_response_code(200);
-
-            $jwt = $_SERVER['HTTP_X_ACCESS_TOKEN'];
-            $userIdxInToken = getDataByJWToken($jwt,JWT_SECRET_KEY)->userIdx;
-            $profileIdxInToken = getDataByJWToken($jwt,JWT_SECRET_KEY)->profileIdx;
-
-            if (!isValidJWT($jwt,JWT_SECRET_KEY)) {
-                $res->isSuccess = FALSE;
-                $res->code = 202;
-                $res->message = "유효하지 않은 토큰입니다";
-                echo json_encode($res, JSON_NUMERIC_CHECK);
-                addErrorLogs($errorLogs, $res, $req);
-                return;
-            }
-
-            if (!isset($vars['video-idx']) or empty($vars['video-idx'])==true) {
-                $res->isSuccess = FALSE;
-                $res->code = 221;
-                $res->message = "videoIdx를 입력해주세요";
-                echo json_encode($res, JSON_NUMERIC_CHECK);
-                break;
-            }
-
-            $videoIdx = $vars['video-idx'];
-
-            if (!is_numeric($videoIdx)) {
-                $res->isSuccess = FALSE;
-                $res->code = 213;
-                $res->message = "videoIdx 타입이 틀립니다";
-                echo json_encode($res, JSON_NUMERIC_CHECK);
-                break;
-            }
-
-            if (!isValidVideoIdx($videoIdx)) {
-                $res->isSuccess = FALSE;
-                $res->code = 223;
-                $res->message = "유효하지 않은 비디오 idx입니다";
-                echo json_encode($res, JSON_NUMERIC_CHECK);
-                break;
-            }
-
-            if (checkHateStatus($profileIdxInToken,$videoIdx)=='D') { // status 확인
-                changeHateToNothing($profileIdxInToken,$videoIdx); // 'N'으로 바꾸기
-                $res->isSuccess = TRUE;
-                $res->code = 411;
-                $res->message = "해당 영상 관심없습니다 취소";
-                echo json_encode($res, JSON_NUMERIC_CHECK);
-                break;
-            }
-
-            if (checkHateStatus($profileIdxInToken,$videoIdx)=='L') { // status 확인
-                changeNothingToHate($profileIdxInToken,$videoIdx); // 'D'으로 바꾸기
-                $res->isSuccess = TRUE;
-                $res->code = 411;
-                $res->message = "해당 영상 관심없습니다 취소";
-                echo json_encode($res, JSON_NUMERIC_CHECK);
-                break;
-            }
-
-            if (checkHateStatus($profileIdxInToken,$videoIdx)=='N') { // status 확인
-                changeNothingToHate($profileIdxInToken,$videoIdx); // 'D'으로 바꾸기
-                $res->isSuccess = TRUE;
-                $res->code = 100;
-                $res->message = "해당 영상 관심없습니다 성공";
-                echo json_encode($res, JSON_NUMERIC_CHECK);
-                break;
-            }
-
-
-            banVideo($profileIdxInToken,$videoIdx); // default D 로 insert
-            $res->isSuccess = TRUE;
-            $res->code = 100;
-            $res->message = "해당 영상 관심없습니다 성공";
-            echo json_encode($res, JSON_NUMERIC_CHECK);
-            break;
-
-        case "likeVideo":
-            http_response_code(200);
-
-            $jwt = $_SERVER['HTTP_X_ACCESS_TOKEN'];
-            $userIdxInToken = getDataByJWToken($jwt,JWT_SECRET_KEY)->userIdx;
-            $profileIdxInToken = getDataByJWToken($jwt,JWT_SECRET_KEY)->profileIdx;
-
-            if (!isValidJWT($jwt,JWT_SECRET_KEY)) {
-                $res->isSuccess = FALSE;
-                $res->code = 202;
-                $res->message = "유효하지 않은 토큰입니다";
-                echo json_encode($res, JSON_NUMERIC_CHECK);
-                addErrorLogs($errorLogs, $res, $req);
-                return;
-            }
-
-            if (!isset($vars['video-idx']) or empty($vars['video-idx'])==true) {
-                $res->isSuccess = FALSE;
-                $res->code = 221;
-                $res->message = "videoIdx를 입력해주세요";
-                echo json_encode($res, JSON_NUMERIC_CHECK);
-                break;
-            }
-
-            $videoIdx = $vars['video-idx'];
-
-            if (!is_numeric($videoIdx)) {
-                $res->isSuccess = FALSE;
-                $res->code = 213;
-                $res->message = "videoIdx 타입이 틀립니다";
-                echo json_encode($res, JSON_NUMERIC_CHECK);
-                break;
-            }
-
-            if (!isValidVideoIdx($videoIdx)) {
-                $res->isSuccess = FALSE;
-                $res->code = 223;
-                $res->message = "유효하지 않은 비디오 idx입니다";
-                echo json_encode($res, JSON_NUMERIC_CHECK);
-                break;
-            }
-
-            if (checkHateStatus($profileIdxInToken,$videoIdx)=='L') { // status 확인
-                changeHateToNothing($profileIdxInToken,$videoIdx); // 'N'으로 바꾸기
-                $res->isSuccess = TRUE;
-                $res->code = 411;
-                $res->message = "해당 영상 보고싶어요 취소";
-                echo json_encode($res, JSON_NUMERIC_CHECK);
-                break;
-            }
-
-            if (checkHateStatus($profileIdxInToken,$videoIdx)=='D') { // status 확인
-                changeNothingToLike($profileIdxInToken,$videoIdx); // 'L'으로 바꾸기
-                $res->isSuccess = TRUE;
-                $res->code = 100;
-                $res->message = "해당 영상 보고싶어요 성공";
-                echo json_encode($res, JSON_NUMERIC_CHECK);
-                break;
-            }
-
-            if (checkHateStatus($profileIdxInToken,$videoIdx)=='N') { // status 확인
-                changeNothingToLike($profileIdxInToken,$videoIdx); // 'L'으로 바꾸기
-                $res->isSuccess = TRUE;
-                $res->code = 100;
-                $res->message = "해당 영상 보고싶어요 성공";
-                echo json_encode($res, JSON_NUMERIC_CHECK);
-                break;
-            }
-
-
-            likeVideo($profileIdxInToken,$videoIdx); // L 로 insert
-            $res->isSuccess = TRUE;
-            $res->code = 100;
-            $res->message = "해당 영상 보고싶어요 성공";
-            echo json_encode($res, JSON_NUMERIC_CHECK);
-            break;
-
-        case "getProfile":
-            http_response_code(200);
-
-            $jwt = $_SERVER['HTTP_X_ACCESS_TOKEN'];
-            $userIdxInToken = getDataByJWToken($jwt,JWT_SECRET_KEY)->userIdx;
-
-            if (!isValidJWT($jwt,JWT_SECRET_KEY)) {
-                $res->isSuccess = FALSE;
-                $res->code = 202;
-                $res->message = "유효하지 않은 토큰입니다";
-                echo json_encode($res, JSON_NUMERIC_CHECK);
-                addErrorLogs($errorLogs, $res, $req);
-                return;
-            }
-
-            $res->result = getProfile($userIdxInToken);
-            $res->isSuccess = TRUE;
-            $res->code = 100;
-            $res->message = "유저 프로필 불러오기 성공";
-            echo json_encode($res, JSON_NUMERIC_CHECK);
-            break;
-
-        case "changeProfileInfo":
-            http_response_code(200);
-
-            $jwt = $_SERVER['HTTP_X_ACCESS_TOKEN'];
-            $userIdxInToken = getDataByJWToken($jwt,JWT_SECRET_KEY)->userIdx;
-
-            if (!isValidJWT($jwt,JWT_SECRET_KEY)) {
-                $res->isSuccess = FALSE;
-                $res->code = 202;
-                $res->message = "유효하지 않은 토큰입니다";
-                echo json_encode($res, JSON_NUMERIC_CHECK);
-                addErrorLogs($errorLogs, $res, $req);
-                return;
-            }
-
-//            if (!isset($req->profileImage) or empty($req->profileImage)==true) {
-//                $res->isSuccess = FALSE;
-//                $res->code = 221;
-//                $res->message = "이미지URL을 입력해주세요";
-//                echo json_encode($res, JSON_NUMERIC_CHECK);
-//                break;
-//            }
-
-            $profileImage = $req->profileImage;
-            $profileName = $req->profileName;
-
-            if (!isset($profileImage)) {
-                $profileImage = null;
-
-                changeProfileName($profileName,$userIdxInToken);
-                $res->isSuccess = TRUE;
-                $res->code = 100;
-                $res->message = "유저 프로필 정보 수정 성공";
-                echo json_encode($res, JSON_NUMERIC_CHECK);
-                break;
-            }
-
-            if (is_numeric($profileImage)) {
-                $res->isSuccess = FALSE;
-                $res->code = 213;
-                $res->message = "입력하신 이미지URL값의 타입이 틀립니다";
-                echo json_encode($res, JSON_NUMERIC_CHECK);
-                break;
-            }
-
-//            if(mb_strlen($req->profileName,'UTF-8')< 2 or mb_strlen($req->profileName,'UTF-8') > 20) {
-//                $res->isSuccess = FALSE;
-//                $res->code = 215;
-//                $res->message = "이름은 최소 2자 최대 20자 입니다";
-//                echo json_encode($res, JSON_NUMERIC_CHECK);
-//                break;
-//            }
-
-            changeProfileInfo($profileImage,$profileName,$userIdxInToken);
-            $res->isSuccess = TRUE;
-            $res->code = 100;
-            $res->message = "유저 프로필 정보 수정 성공";
-            echo json_encode($res, JSON_NUMERIC_CHECK);
-            break;
-
-        case "rateWithStar":
-            http_response_code(200);
-
-            $jwt = $_SERVER['HTTP_X_ACCESS_TOKEN'];
-            $userIdxInToken = getDataByJWToken($jwt,JWT_SECRET_KEY)->userIdx;
-            $profileIdxInToken = getDataByJWToken($jwt,JWT_SECRET_KEY)->profileIdx;
-
-            if (!isValidJWT($jwt,JWT_SECRET_KEY)) {
-                $res->isSuccess = FALSE;
-                $res->code = 202;
-                $res->message = "유효하지 않은 토큰입니다";
-                echo json_encode($res, JSON_NUMERIC_CHECK);
-                addErrorLogs($errorLogs, $res, $req);
-                return;
-            }
-
-            if (!isset($vars['video-idx']) or empty($vars['video-idx'])==true) {
-                $res->isSuccess = FALSE;
-                $res->code = 221;
-                $res->message = "videoIdx를 입력해주세요";
-                echo json_encode($res, JSON_NUMERIC_CHECK);
-                break;
-            }
-
-            $videoIdx = $vars['video-idx'];
-
-            if (!is_numeric($videoIdx)) {
-                $res->isSuccess = FALSE;
-                $res->code = 213;
-                $res->message = "videoIdx 타입이 틀립니다";
-                echo json_encode($res, JSON_NUMERIC_CHECK);
-                break;
-            }
-
-            if (!isValidVideoIdx($videoIdx)) {
-                $res->isSuccess = FALSE;
-                $res->code = 223;
-                $res->message = "유효하지 않은 비디오 idx입니다";
-                echo json_encode($res, JSON_NUMERIC_CHECK);
-                break;
-            }
-
-            if (!isset($req->ratingStar) or empty($req->ratingStar)==true) {
-                $res->isSuccess = FALSE;
-                $res->code = 266;
-                $res->message = "별점 점수를 입력해주세요";
-                echo json_encode($res, JSON_NUMERIC_CHECK);
-                break;
-            }
-
-            $ratingStar = $req->ratingStar;
-
-            if (!is_numeric($ratingStar)) {
-                $res->isSuccess = FALSE;
-                $res->code = 216;
-                $res->message = "ratingStar 타입이 틀립니다";
-                echo json_encode($res, JSON_NUMERIC_CHECK);
-                break;
-            }
-
-            if ($ratingStar > 5) {
-                $res->isSuccess = FALSE;
-                $res->code = 250;
-                $res->message = "줄 수 있는 최대 별점은 5점입니다";
-                echo json_encode($res, JSON_NUMERIC_CHECK);
-                break;
-            }
-
-            if (checkUserAlreadyRate($profileIdxInToken,$videoIdx) and checkRateDeleted($profileIdxInToken,$videoIdx)=='N') { // 평가한 영상은 또 평가할 수 없음
-                $res->isSuccess = FALSE;
-                $res->code = 300;
-                $res->message = "한번 평가한 영상은 더 이상 평가할 수 없습니다";
-                echo json_encode($res, JSON_NUMERIC_CHECK);
-                break;
-            }
-
-            rateWithStar($profileIdxInToken,$videoIdx,$ratingStar);
-            $res->isSuccess = TRUE;
-            $res->code = 100;
-            $res->message = "유저 별점 평가 성공";
-            echo json_encode($res, JSON_NUMERIC_CHECK);
-            break;
-
-//        case "searchVidByName":
-//            http_response_code(200);
-//
-//            $keyword = $_GET['keyword'];
-//            $keyword = str_replace(' ','',$keyword);
-//
-//            $res->result = searchVidByName($keyword);
-//            $res->isSuccess = TRUE;
-//            $res->code = 100;
-//            $res->message = "영상 검색 성공";
-//            echo json_encode($res, JSON_NUMERIC_CHECK);
-//            break;
-
-        case "getPopularVideos":
-            http_response_code(200);
-
-            $popularVideos = getPopularVideosByOrder();
-
-            $res->result = $popularVideos;
-            $res->isSuccess = TRUE;
-            $res->code = 100;
-            $res->message = "인기 검색 영상 조회 성공";
-            echo json_encode($res, JSON_NUMERIC_CHECK);
-            break;
-
-        case "deleteRate":
-            http_response_code(200);
-
-            $jwt = $_SERVER['HTTP_X_ACCESS_TOKEN'];
-            $userIdxInToken = getDataByJWToken($jwt,JWT_SECRET_KEY)->userIdx;
-            $profileIdxInToken = getDataByJWToken($jwt,JWT_SECRET_KEY)->profileIdx;
-
-            if (!isValidJWT($jwt,JWT_SECRET_KEY)) {
-                $res->isSuccess = FALSE;
-                $res->code = 202;
-                $res->message = "유효하지 않은 토큰입니다";
-                echo json_encode($res, JSON_NUMERIC_CHECK);
-                addErrorLogs($errorLogs, $res, $req);
-                return;
-            }
-
-            if (!isset($vars['video-idx']) or empty($vars['video-idx'])==true) {
-                $res->isSuccess = FALSE;
-                $res->code = 221;
-                $res->message = "videoIdx를 입력해주세요";
-                echo json_encode($res, JSON_NUMERIC_CHECK);
-                break;
-            }
-
-            $videoIdx = $vars['video-idx'];
-
-            if (!is_numeric($videoIdx)) {
-                $res->isSuccess = FALSE;
-                $res->code = 213;
-                $res->message = "videoIdx 타입이 틀립니다";
-                echo json_encode($res, JSON_NUMERIC_CHECK);
-                break;
-            }
-
-            if (!isValidVideoIdx($videoIdx)) {
-                $res->isSuccess = FALSE;
-                $res->code = 223;
-                $res->message = "유효하지 않은 비디오 idx입니다";
-                echo json_encode($res, JSON_NUMERIC_CHECK);
-                break;
-            }
-
-            if (!checkUserAlreadyRate($profileIdxInToken,$videoIdx)) { // 이미 삭제된건지 확인
-                $res->isSuccess = FALSE;
-                $res->code = 300;
-                $res->message = "평가하지 않은 영상idx입니다";
-                echo json_encode($res, JSON_NUMERIC_CHECK);
-                break;
-            }
-
-            deleteRate($profileIdxInToken,$videoIdx);
-            $res->isSuccess = TRUE;
-            $res->code = 100;
-            $res->message = "유저 별점 평가 취소 성공";
-            echo json_encode($res, JSON_NUMERIC_CHECK);
-            break;
-
-        case "getVideoInfo":
-            http_response_code(200);
-
-            if (!isset($vars['video-idx']) or empty($vars['video-idx'])==true) {
-                $res->isSuccess = FALSE;
-                $res->code = 221;
-                $res->message = "videoIdx를 입력해주세요";
-                echo json_encode($res, JSON_NUMERIC_CHECK);
-                break;
-            }
-
-            $videoIdx = $vars['video-idx'];
-
-            if (!is_numeric($videoIdx)) {
-                $res->isSuccess = FALSE;
-                $res->code = 213;
-                $res->message = "videoIdx 타입이 틀립니다";
-                echo json_encode($res, JSON_NUMERIC_CHECK);
-                break;
-            }
-
-            if (!isValidVideoIdx($videoIdx)) {
-                $res->isSuccess = FALSE;
-                $res->code = 223;
-                $res->message = "유효하지 않은 비디오 idx입니다";
-                echo json_encode($res, JSON_NUMERIC_CHECK);
-                break;
-            }
-
-            if (checkMovie($videoIdx)) {
-                $res->result = getMovieInfo($videoIdx);
-                $res->isSuccess = TRUE;
-                $res->code = 100;
-                $res->message = "특정 영화 정보 조회 성공";
-                echo json_encode($res, JSON_NUMERIC_CHECK);
-                break;
-            }
-
-            $res->result = getDramaInfo($videoIdx);
-            $res->isSuccess = TRUE;
-            $res->code = 110;
-            $res->message = "특정 드라마 정보 조회 성공";
             echo json_encode($res, JSON_NUMERIC_CHECK);
             break;
 
@@ -671,164 +90,6 @@ try {
             echo json_encode($res, JSON_NUMERIC_CHECK);
             break;
 
-        case "getFavVideos":
-            http_response_code(200);
-
-            $jwt = $_SERVER['HTTP_X_ACCESS_TOKEN'];
-            $userIdxInToken = getDataByJWToken($jwt,JWT_SECRET_KEY)->userIdx;
-            $profileIdxInToken = getDataByJWToken($jwt,JWT_SECRET_KEY)->profileIdx;
-
-            if (!isValidJWT($jwt,JWT_SECRET_KEY)) {
-                $res->isSuccess = FALSE;
-                $res->code = 202;
-                $res->message = "유효하지 않은 토큰입니다";
-                echo json_encode($res, JSON_NUMERIC_CHECK);
-                addErrorLogs($errorLogs, $res, $req);
-                return;
-            }
-
-            $res->result = getFavVideos($profileIdxInToken);
-            $res->isSuccess = TRUE;
-            $res->code = 100;
-            $res->message = "유저가 보고싶어요 표시한 영상 조회";
-            echo json_encode($res, JSON_NUMERIC_CHECK);
-            break;
-
-        case "playVideo":
-            http_response_code(200);
-
-            $jwt = $_SERVER['HTTP_X_ACCESS_TOKEN'];
-            $userIdxInToken = getDataByJWToken($jwt,JWT_SECRET_KEY)->userIdx;
-            $profileIdxInToken = getDataByJWToken($jwt,JWT_SECRET_KEY)->profileIdx;
-
-            if (!isValidJWT($jwt,JWT_SECRET_KEY)) {
-                $res->isSuccess = FALSE;
-                $res->code = 202;
-                $res->message = "유효하지 않은 토큰입니다";
-                echo json_encode($res, JSON_NUMERIC_CHECK);
-                addErrorLogs($errorLogs, $res, $req);
-                return;
-            }
-
-            if (empty($_GET['video']) and empty($_GET['episode']))  {
-                $res->isSuccess = FALSE;
-                $res->code = 250;
-                $res->message = "video,episode 둘 중 하나는 입력해주셔야 합니다";
-                echo json_encode($res, JSON_NUMERIC_CHECK);
-                break;
-            }
-
-//            if (!empty($_GET['video']) and !empty($_GET['episode']))  {
-//                $res->isSuccess = FALSE;
-//                $res->code = 260;
-//                $res->message = "videoIdx,episodeIdx 둘 중 하나만 입력해주셔야 합니다";
-//                echo json_encode($res, JSON_NUMERIC_CHECK);
-//                break;
-//            }
-
-            $videoIdx = $_GET['video'];
-            $episodeIdx = $_GET['episode'];
-
-            if (!isset($episodeIdx)) { //영화를 볼때
-
-                if (!is_numeric($videoIdx)) {
-                    $res->isSuccess = FALSE;
-                    $res->code = 212;
-                    $res->message = "videoIdx 타입이 틀립니다";
-                    echo json_encode($res, JSON_NUMERIC_CHECK);
-                    break;
-                }
-
-                if (!isValidVideoIdx($videoIdx)) {
-                    $res->isSuccess = FALSE;
-                    $res->code = 222;
-                    $res->message = "유효하지 않은 비디오 idx입니다";
-                    echo json_encode($res, JSON_NUMERIC_CHECK);
-                    break;
-                }
-
-                if (!isMovie($videoIdx)) {
-                    $res->isSuccess = FALSE;
-                    $res->code = 430;
-                    $res->message = "해당 영상은 영화가 아닙니다";
-                    echo json_encode($res, JSON_NUMERIC_CHECK);
-                    break;
-                }
-
-                if (checkProfileVideoWatch($profileIdxInToken,$videoIdx)) {
-                    $res->result = playMovieWithoutInsert($videoIdx)[0];
-                    $res->isSuccess = TRUE;
-                    $res->code = 110;
-                    $res->message = "영화 URL 불러오기 성공(영상 재생)";
-                    echo json_encode($res, JSON_NUMERIC_CHECK);
-                    break;
-                }
-
-                $res->result = playMovie($profileIdxInToken,$videoIdx)[0];
-                $res->isSuccess = TRUE;
-                $res->code = 110;
-                $res->message = "영화 URL 불러오기 성공(영상 재생)";
-                echo json_encode($res, JSON_NUMERIC_CHECK);
-                break;
-            }
-
-            if (!is_numeric($videoIdx)) {
-                $res->isSuccess = FALSE;
-                $res->code = 212;
-                $res->message = "videoIdx 타입이 틀립니다";
-                echo json_encode($res, JSON_NUMERIC_CHECK);
-                break;
-            }
-
-            if (!isValidVideoIdx($videoIdx)) {
-                $res->isSuccess = FALSE;
-                $res->code = 222;
-                $res->message = "유효하지 않은 비디오 idx입니다";
-                echo json_encode($res, JSON_NUMERIC_CHECK);
-                break;
-            }
-
-            if (!is_numeric($episodeIdx)) {
-                $res->isSuccess = FALSE;
-                $res->code = 213;
-                $res->message = "episodeIdx 타입이 틀립니다";
-                echo json_encode($res, JSON_NUMERIC_CHECK);
-                break;
-            }
-
-            if (!isValidEpisodeIdx($episodeIdx)) {
-                $res->isSuccess = FALSE;
-                $res->code = 223;
-                $res->message = "유효하지 않은 episodeIdx입니다";
-                echo json_encode($res, JSON_NUMERIC_CHECK);
-                break;
-            }
-
-            if(!checkVideoEpisodeCorrect($videoIdx,$episodeIdx)) {
-                $res->isSuccess = FALSE;
-                $res->code = 310;
-                $res->message = "해당 드라마의 에피소드가 아닙니다";
-                echo json_encode($res, JSON_NUMERIC_CHECK);
-                break;
-            }
-
-            if (checkProfileEpisodeWatch($profileIdxInToken,$episodeIdx)) {
-                $res->result = playDramaWithoutInsert($episodeIdx)[0];
-                $res->isSuccess = TRUE;
-                $res->code = 100;
-                $res->message = "드라마 URL 불러오기 성공(영상 재생)";
-                echo json_encode($res, JSON_NUMERIC_CHECK);
-                break;
-            }
-
-            $res->result = playDrama($profileIdxInToken,$videoIdx,$episodeIdx)[0];
-            $res->isSuccess = TRUE;
-            $res->code = 100;
-            $res->message = "드라마 URL 불러오기 성공(영상 재생)";
-            echo json_encode($res, JSON_NUMERIC_CHECK);
-            break;
-
-
 
         case "getVideoIdx":
             http_response_code(200);
@@ -840,9 +101,8 @@ try {
             echo json_encode($res, JSON_NUMERIC_CHECK);
             break;
 
-        case "changeWatchTime":
+        case "kakaoPayClient":
             http_response_code(200);
-
             $jwt = $_SERVER['HTTP_X_ACCESS_TOKEN'];
             $userIdxInToken = getDataByJWToken($jwt,JWT_SECRET_KEY)->userIdx;
             $profileIdxInToken = getDataByJWToken($jwt,JWT_SECRET_KEY)->profileIdx;
@@ -856,351 +116,123 @@ try {
                 return;
             }
 
-            if (!isset($req->watchTime) or empty($req->watchTime)==true) {
+            $url = 'https://kapi.kakao.com/v1/payment/ready';
+            $adminKey = '765511f5ffff6f735aa340bfc0a3fa96';
+            $header = array(
+                "Authorization: KakaoAK ".$adminKey,
+                "Content-type: application/x-www-form-urlencoded;charset=utf-8"
+                );
+            $data = array(
+                "cid" => "TC0ONETIME",
+                "partner_order_id" => "5",
+                "partner_user_id" => $userIdxInToken,
+                "item_name" => "베이직 이용권",
+                "quantity" => '1',
+                "total_amount" => '18000',
+                "tax_free_amount" => '0',
+                "approval_url" => "https://test.ericapp.shop/success",
+                "fail_url" => "https://test.ericapp.shop/fail",
+                "cancel_url" => "https://test.ericapp.shop/cancel"
+            );
+
+            $ch = curl_init();
+            curl_setopt($ch, CURLOPT_URL, $url);			#접속할 URL 주소
+            curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, 0);
+            curl_setopt($ch, CURLOPT_HTTPHEADER, $header);
+            curl_setopt($ch, CURLOPT_HEADER, 0);			# 헤더 출력 여부
+            curl_setopt($ch, CURLOPT_POST, 1);				# Post Get 접속 여부
+            curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query($data));
+            curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+
+            $res = curl_exec($ch);
+            echo $res;
+            break;
+
+        case "kakaoPayServer":
+            http_response_code(200);
+
+            http_response_code(200);
+            $jwt = $_SERVER['HTTP_X_ACCESS_TOKEN'];
+            $userIdxInToken = getDataByJWToken($jwt,JWT_SECRET_KEY)->userIdx;
+            $profileIdxInToken = getDataByJWToken($jwt,JWT_SECRET_KEY)->profileIdx;
+
+            if (!isValidJWT($jwt,JWT_SECRET_KEY)) {
                 $res->isSuccess = FALSE;
-                $res->code = 221;
-                $res->message = "watchTime을 입력해주세요";
+                $res->code = 202;
+                $res->message = "유효하지 않은 토큰입니다";
                 echo json_encode($res, JSON_NUMERIC_CHECK);
-                break;
+                addErrorLogs($errorLogs, $res, $req);
+                return;
             }
 
-            if (empty($req->videoIdx) and empty($req->episodeIdx))  {
-                $res->isSuccess = FALSE;
-                $res->code = 250;
-                $res->message = "videoIdx,episodeIdx 둘 중 하나는 입력해주셔야 합니다";
-                echo json_encode($res, JSON_NUMERIC_CHECK);
-                break;
-            }
-
-//            if (!empty($req->videoIdx) and !empty($req->episodeIdx))  {
-//                $res->isSuccess = FALSE;
-//                $res->code = 260;
-//                $res->message = "videoIdx,episodeIdx 둘 중 하나만 입력해주셔야 합니다";
-//                echo json_encode($res, JSON_NUMERIC_CHECK);
-//                break;
-//            }
-
-            $watchTime = $req->watchTime;
-            $videoIdx = $req->videoIdx;
-            $episodeIdx = $req->episodeIdx;
-
-            if (!is_numeric($watchTime)) {
-                $res->isSuccess = FALSE;
-                $res->code = 213;
-                $res->message = "watchTime 타입이 틀립니다";
-                echo json_encode($res, JSON_NUMERIC_CHECK);
-                break;
-            }
-
-            if (!isset($episodeIdx)) { //영화를 볼때
-
-                if (!is_numeric($videoIdx)) {
-                    $res->isSuccess = FALSE;
-                    $res->code = 212;
-                    $res->message = "videoIdx 타입이 틀립니다";
-                    echo json_encode($res, JSON_NUMERIC_CHECK);
-                    break;
-                }
-
-                if (!isValidVideoIdx($videoIdx)) {
-                    $res->isSuccess = FALSE;
-                    $res->code = 222;
-                    $res->message = "유효하지 않은 비디오 idx입니다";
-                    echo json_encode($res, JSON_NUMERIC_CHECK);
-                    break;
-                }
-
-                if (!checkProfileVideoWatch($profileIdxInToken,$videoIdx)) {
-                    $res->isSuccess = FALSE;
-                    $res->code = 390;
-                    $res->message = "시청중인 영화가 아닙니다";
-                    echo json_encode($res, JSON_NUMERIC_CHECK);
-                    break;
-                }
-
-                if (isMovie($videoIdx)-10 <= $watchTime/60 ) {
-
-                    moveMovieToHistory($profileIdxInToken,$videoIdx);
-                    $res->isSuccess = TRUE;
-                    $res->code = 120;
-                    $res->message = "영화를 모두 시청했습니다";
-                    echo json_encode($res, JSON_NUMERIC_CHECK);
-                    break;
-                }
-
-                changeMovieWatchTime($watchTime,$profileIdxInToken,$videoIdx);
-                $res->isSuccess = TRUE;
-                $res->code = 110;
-                $res->message = "영화 시청시간 수정 성공";
-                echo json_encode($res, JSON_NUMERIC_CHECK);
-                break;
-            }
-
-            if (!is_numeric($videoIdx)) { // 드라마를 볼 때
-                $res->isSuccess = FALSE;
-                $res->code = 212;
-                $res->message = "videoIdx 타입이 틀립니다";
-                echo json_encode($res, JSON_NUMERIC_CHECK);
-                break;
-            }
-
-            if (!isValidVideoIdx($videoIdx)) {
+            if (!isset($req->tid,$req->pgToken) or empty($req->tid)==true or empty($req->pgToken)==true) {
                 $res->isSuccess = FALSE;
                 $res->code = 222;
-                $res->message = "유효하지 않은 비디오 idx입니다";
+                $res->message = "tid와 pgToken을 모두 입력해주세요";
                 echo json_encode($res, JSON_NUMERIC_CHECK);
                 break;
             }
 
-            if (!is_numeric($episodeIdx)) {
+            $tid = $req->tid;
+            $pgToken = $req->pgToken;
+
+            if (is_numeric($tid)) {
                 $res->isSuccess = FALSE;
-                $res->code = 213;
-                $res->message = "episodeIdx 타입이 틀립니다";
+                $res->code = 211;
+                $res->message = "tid 타입이 틀립니다";
                 echo json_encode($res, JSON_NUMERIC_CHECK);
                 break;
             }
 
-            if (!isValidEpisodeIdx($episodeIdx)) {
+            if (is_numeric($pgToken)) {
                 $res->isSuccess = FALSE;
-                $res->code = 223;
-                $res->message = "유효하지 않은 episodeIdx입니다";
+                $res->code = 215;
+                $res->message = "pgToken 타입이 틀립니다";
                 echo json_encode($res, JSON_NUMERIC_CHECK);
                 break;
             }
 
-            if(!checkVideoEpisodeCorrect($videoIdx,$episodeIdx)) {
+            $url = 'https://kapi.kakao.com/v1/payment/approve';
+            $adminKey = '765511f5ffff6f735aa340bfc0a3fa96';
+            $header = array(
+                "Authorization: KakaoAK ".$adminKey,
+                "Content-type: application/x-www-form-urlencoded;charset=utf-8"
+            );
+            $approveData = array(
+                "cid" => "TC0ONETIME",
+                "partner_order_id" => "5",
+                "partner_user_id" => $userIdxInToken,
+                "tid" => $tid,
+                "pg_token" => $pgToken
+            );
+
+            $ch = curl_init();
+            curl_setopt($ch, CURLOPT_URL, $url);			#접속할 URL 주소
+            curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, 0);	#인증서 체크같은데 true 시 안되는 경우가 많다.
+            curl_setopt($ch, CURLOPT_HTTPHEADER, $header);
+            curl_setopt($ch, CURLOPT_HEADER, 0);			# 헤더 출력 여부
+            curl_setopt($ch, CURLOPT_POST, 1);				# Post Get 접속 여부
+            curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query($approveData));	# Post 값 Get 방식처럼적는다.
+            curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+
+            $result1 = curl_exec($ch);
+
+            $paid = json_decode($result1);
+            $itemName = $paid->item_name;
+
+            if (!isset($itemName)) {
                 $res->isSuccess = FALSE;
-                $res->code = 310;
-                $res->message = "해당 드라마의 에피소드가 아닙니다";
+                $res->code = 422;
+                $res->message = "결제 유효시간이 지났습니다. 다시 결제를 진행해주세요";
                 echo json_encode($res, JSON_NUMERIC_CHECK);
                 break;
             }
 
-            if (!checkProfileEpisodeWatch($profileIdxInToken,$episodeIdx)) {
-                $res->isSuccess = FALSE;
-                $res->code = 380;
-                $res->message = "시청중인 드라마가 아닙니다";
-                echo json_encode($res, JSON_NUMERIC_CHECK);
-                break;
-            }
-
-            if (getLastEpisodeIdx($videoIdx)== $episodeIdx and getEpisodeTime($episodeIdx)-3 <= $watchTime/60) {
-
-                moveDramaToHistory($profileIdxInToken,$videoIdx,$episodeIdx);
-                $res->isSuccess = TRUE;
-                $res->code = 150;
-                $res->message = "드라마를 모두 시청했습니다";
-                echo json_encode($res, JSON_NUMERIC_CHECK);
-                break;
-            }
-
-            changeDramaWatchTime($watchTime,$profileIdxInToken,$episodeIdx);
+            savePayment($userIdxInToken,$itemName);
+            $res->result = $itemName;
             $res->isSuccess = TRUE;
             $res->code = 100;
-            $res->message = "드라마 시청시간 수정 성공";
-            echo json_encode($res, JSON_NUMERIC_CHECK);
-            break;
-
-        case "getWatchingVideo":
-            http_response_code(200);
-
-            $jwt = $_SERVER['HTTP_X_ACCESS_TOKEN'];
-            $userIdxInToken = getDataByJWToken($jwt,JWT_SECRET_KEY)->userIdx;
-            $profileIdxInToken = getDataByJWToken($jwt,JWT_SECRET_KEY)->profileIdx;
-
-            if (!isValidJWT($jwt,JWT_SECRET_KEY)) {
-                $res->isSuccess = FALSE;
-                $res->code = 202;
-                $res->message = "유효하지 않은 토큰입니다";
-                echo json_encode($res, JSON_NUMERIC_CHECK);
-                addErrorLogs($errorLogs, $res, $req);
-                return;
-            }
-
-            $res->result = getWatchingVideo($profileIdxInToken);
-            $res->isSuccess = TRUE;
-            $res->code = 100;
-            $res->message = "시청중인 영상 조회 성공";
-            echo json_encode($res, JSON_NUMERIC_CHECK);
-            break;
-
-        case "getHistory":
-            http_response_code(200);
-
-            $jwt = $_SERVER['HTTP_X_ACCESS_TOKEN'];
-            $userIdxInToken = getDataByJWToken($jwt,JWT_SECRET_KEY)->userIdx;
-            $profileIdxInToken = getDataByJWToken($jwt,JWT_SECRET_KEY)->profileIdx;
-
-            if (!isValidJWT($jwt,JWT_SECRET_KEY)) {
-                $res->isSuccess = FALSE;
-                $res->code = 202;
-                $res->message = "유효하지 않은 토큰입니다";
-                echo json_encode($res, JSON_NUMERIC_CHECK);
-                addErrorLogs($errorLogs, $res, $req);
-                return;
-            }
-
-            $res->result = getHistory($profileIdxInToken);
-            $res->isSuccess = TRUE;
-            $res->code = 100;
-            $res->message = "다 본 작품 조회 성공";
-            echo json_encode($res, JSON_NUMERIC_CHECK);
-            break;
-
-        case "deleteHistory":
-            http_response_code(200);
-
-            $jwt = $_SERVER['HTTP_X_ACCESS_TOKEN'];
-            $userIdxInToken = getDataByJWToken($jwt,JWT_SECRET_KEY)->userIdx;
-            $profileIdxInToken = getDataByJWToken($jwt,JWT_SECRET_KEY)->profileIdx;
-
-            if (!isValidJWT($jwt,JWT_SECRET_KEY)) {
-                $res->isSuccess = FALSE;
-                $res->code = 202;
-                $res->message = "유효하지 않은 토큰입니다";
-                echo json_encode($res, JSON_NUMERIC_CHECK);
-                addErrorLogs($errorLogs, $res, $req);
-                return;
-            }
-
-            if (!isset($req->videoIdx) or empty($req->videoIdx)==true) {
-                $res->isSuccess = FALSE;
-                $res->code = 221;
-                $res->message = "videoIdx를 입력해주세요";
-                echo json_encode($res, JSON_NUMERIC_CHECK);
-                break;
-            }
-
-            $videoIdx = $req->videoIdx;
-            $errorArr = array();
-
-            foreach ($videoIdx as $value) {
-
-                if (!is_numeric($value)) {
-                    array_push($errorArr,1);
-                    break;
-                }
-                if (!isValidVideoIdx($value)) {
-                    array_push($errorArr,2);
-                    break;
-                }
-
-                if (!checkProfileHistory($profileIdxInToken,$value)) {
-                    array_push($errorArr,3);
-                    break;
-                }
-            }
-
-            if (in_array(1,$errorArr)) {
-                $res->isSuccess = FALSE;
-                $res->code = 249;
-                $res->message = "틀린 videoIdx 타입이 포함되어 있습니다";
-                echo json_encode($res, JSON_NUMERIC_CHECK);
-                break;
-            }
-
-            if (in_array(2,$errorArr)) {
-                $res->isSuccess = FALSE;
-                $res->code = 248;
-                $res->message = "유효하지않은 videoIdx가 포함되어 있습니다";
-                echo json_encode($res, JSON_NUMERIC_CHECK);
-                break;
-            }
-
-            if (in_array(3,$errorArr)) {
-                $res->isSuccess = FALSE;
-                $res->code = 401;
-                $res->message = "다보지않은 video의 idx가 포함되어 있습니다";
-                echo json_encode($res, JSON_NUMERIC_CHECK);
-                break;
-            }
-
-            foreach ($videoIdx as $value) {
-                deleteHistory($value,$profileIdxInToken);
-            }
-
-            $res->isSuccess = TRUE;
-            $res->code = 100;
-            $res->message = "다 본 작품 항목 삭제 완료";
-            echo json_encode($res, JSON_NUMERIC_CHECK);
-            break;
-
-
-        case "deleteWatchingVideo":
-            http_response_code(200);
-
-            $jwt = $_SERVER['HTTP_X_ACCESS_TOKEN'];
-            $userIdxInToken = getDataByJWToken($jwt,JWT_SECRET_KEY)->userIdx;
-            $profileIdxInToken = getDataByJWToken($jwt,JWT_SECRET_KEY)->profileIdx;
-
-            if (!isValidJWT($jwt,JWT_SECRET_KEY)) {
-                $res->isSuccess = FALSE;
-                $res->code = 202;
-                $res->message = "유효하지 않은 토큰입니다";
-                echo json_encode($res, JSON_NUMERIC_CHECK);
-                addErrorLogs($errorLogs, $res, $req);
-                return;
-            }
-
-            if (!isset($req->videoIdx) or empty($req->videoIdx)==true) {
-                $res->isSuccess = FALSE;
-                $res->code = 221;
-                $res->message = "videoIdx를 입력해주세요";
-                echo json_encode($res, JSON_NUMERIC_CHECK);
-                break;
-            }
-
-            $videoIdx = $req->videoIdx;
-            $errorArr = array();
-
-            foreach ($videoIdx as $value) {
-
-                if (!is_numeric($value)) {
-                    array_push($errorArr,1);
-                    break;
-                }
-                if (!isValidVideoIdx($value)) {
-                    array_push($errorArr,2);
-                    break;
-                }
-
-                if (!checkProfileVideoWatch($profileIdxInToken,$value)) {
-                    array_push($errorArr,3);
-                    break;
-                }
-            }
-
-            if (in_array(1,$errorArr)) {
-                $res->isSuccess = FALSE;
-                $res->code = 249;
-                $res->message = "틀린 videoIdx 타입이 포함되어 있습니다";
-                echo json_encode($res, JSON_NUMERIC_CHECK);
-                break;
-            }
-
-            if (in_array(2,$errorArr)) {
-                $res->isSuccess = FALSE;
-                $res->code = 248;
-                $res->message = "유효하지않은 videoIdx가 포함되어 있습니다";
-                echo json_encode($res, JSON_NUMERIC_CHECK);
-                break;
-            }
-
-            if (in_array(3,$errorArr)) {
-                $res->isSuccess = FALSE;
-                $res->code = 401;
-                $res->message = "조회하지 않은 video의 idx가 포함되어 있습니다";
-                echo json_encode($res, JSON_NUMERIC_CHECK);
-                break;
-            }
-
-            foreach ($videoIdx as $value) {
-                deleteWatchingVideo($value,$profileIdxInToken);
-            }
-
-            $res->isSuccess = TRUE;
-            $res->code = 100;
-            $res->message = "이어보기 항목 삭제 완료";
+            $res->message = "카카오페이 결제 완료";
             echo json_encode($res, JSON_NUMERIC_CHECK);
             break;
 

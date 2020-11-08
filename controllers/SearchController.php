@@ -100,6 +100,18 @@ try {
             echo json_encode($res, JSON_NUMERIC_CHECK);
             break;
 
+        case "getPopularVideos":
+            http_response_code(200);
+
+            $popularVideos = getPopularVideosByOrder();
+
+            $res->result = $popularVideos;
+            $res->isSuccess = TRUE;
+            $res->code = 100;
+            $res->message = "인기 검색 영상 조회 성공";
+            echo json_encode($res, JSON_NUMERIC_CHECK);
+            break;
+
 
 
     }

@@ -1,5 +1,7 @@
 <?php
 
+require './pdos/UserPdo.php';
+require './pdos/VideoPdo.php';
 require './pdos/SearchPdo.php';
 require './pdos/DatabasePdo.php';
 require './pdos/IndexPdo.php';
@@ -27,29 +29,40 @@ $dispatcher = FastRoute\simpleDispatcher(function (FastRoute\RouteCollector $r) 
     $r->addRoute('GET', '/users/{userIdx}', ['IndexController', 'getUserDetail']);
     $r->addRoute('POST', '/user', ['IndexController', 'createUser']); // 비밀번호 해싱 예시 추가
 
-//    $r->addRoute('POST', '/naver/user', ['IndexController', 'naverSignUp']); // 네이버 회원가입
+    /* ******************   jwt   ****************** */
     $r->addRoute('POST', '/naver/login', ['JWTController', 'naverLogin']); // 네이버 로그인
-    $r->addRoute('GET', '/videos', ['IndexController', 'getVideos']); // 유저 기반 모든 영상 조회 (평가하기)
-    $r->addRoute('GET', '/genre', ['IndexController', 'getGenreIdx']); // 장르 idx 조회
-    $r->addRoute('GET', '/videos/genre-country', ['SearchController', 'searchVidByCategory']); // 카테고리별로 영상 검색
-    $r->addRoute('PATCH', '/video/{video-idx}/not-good', ['IndexController', 'banVideo']); // 특정 영상 관심없어요 추가/삭제
-    $r->addRoute('PATCH', '/video/{video-idx}/good', ['IndexController', 'likeVideo']); // 특정 영상 보고싶어요 추가/삭제
-    $r->addRoute('POST', '/video/{video-idx}/rate', ['IndexController', 'rateWithStar']); // 별점 평가하기
-    $r->addRoute('GET', '/profile', ['IndexController', 'getProfile']); // 유저 프로필 조회
-    $r->addRoute('PATCH', '/profile', ['IndexController', 'changeProfileInfo']); // 유저 프로필 정보 수정
+
+    /* ******************   search   ****************** */
     $r->addRoute('GET', '/video/name', ['SearchController', 'searchVidByName']); // 이름으로 영상 검색
-    $r->addRoute('GET', '/video/popular', ['IndexController', 'getPopularVideos']); // 인기 검색 영상 조회
-    $r->addRoute('DELETE', '/video/{video-idx}/rate', ['IndexController', 'deleteRate']); // 별점 평가하기 취소하기
-    $r->addRoute('GET', '/videos/{video-idx}', ['IndexController', 'getVideoInfo']); // 특정 영상 정보 조회
+    $r->addRoute('GET', '/videos/genre-country', ['SearchController', 'searchVidByCategory']); // 장르,국가 별로 영상 검색
+    $r->addRoute('GET', '/videos/popular', ['SearchController', 'getPopularVideos']); // 인기검색 콘텐츠 조회
+
+    /* ******************   video   ****************** */
+    $r->addRoute('GET', '/video/url', ['VideoController', 'playVideo']); // 동영상 재생 o
+    $r->addRoute('GET', '/videos/{video-idx}', ['VideoController', 'getVideoInfo']); // 특정 영상 정보 조회 o
+    $r->addRoute('PATCH', '/video/{video-idx}/not-good', ['VideoController', 'banVideo']); // 특정 영상 관심없어요 추가/삭제 o
+    $r->addRoute('PATCH', '/video/{video-idx}/good', ['VideoController', 'likeVideo']); // 특정 영상 보고싶어요 추가/삭제 o
+    $r->addRoute('POST', '/video/{video-idx}/rate', ['VideoController', 'rateWithStar']); // 별점 평가하기
+    $r->addRoute('DELETE', '/video/{video-idx}/rate', ['VideoController', 'deleteRate']); // 별점 평가하기 취소하기
+    $r->addRoute('PATCH', '/watching-video', ['VideoController', 'changeWatchTime']); // 시청 시간 보내기
+    $r->addRoute('DELETE', '/history', ['VideoController', 'deleteHistory']); // 다 본 작품 항목 삭제하기
+    $r->addRoute('DELETE', '/watching-video', ['VideoController', 'deleteWatchingVideo']); // 이어보기 항목 삭제하기
+
+    /* ******************   user   ****************** */
+    $r->addRoute('GET', '/profile', ['UserController', 'getProfile']); // 유저 프로필 조회
+    $r->addRoute('PATCH', '/profile', ['UserController', 'changeProfileInfo']); // 유저 프로필 정보 수정
+    $r->addRoute('GET', '/user/fav-videos', ['UserController', 'getFavVideos']); // 보고싶어요 표시한 영상 조회
+    $r->addRoute('GET', '/watching-video', ['UserController', 'getWatchingVideo']); // 시청중인 영상 조회
+    $r->addRoute('GET', '/history', ['UserController', 'getHistory']); // 다 본 작품 조회하기
+    $r->addRoute('GET', '/videos', ['UserController', 'getVideos']); // 유저 기반 모든 영상 조회 (평가하기)
+
+    /* ******************   index   ****************** */
     $r->addRoute('GET', '/country', ['IndexController', 'getCountryIdx']); // 국가 idx 조회
-    $r->addRoute('GET', '/user/fav-videos', ['IndexController', 'getFavVideos']); // 보고싶어요 표시한 영상 조회
-    $r->addRoute('GET', '/video/url', ['IndexController', 'playVideo']); // 동영상 재생
+    $r->addRoute('GET', '/genre', ['IndexController', 'getGenreIdx']); // 장르 idx 조회
     $r->addRoute('GET', '/video-idx', ['IndexController', 'getVideoIdx']); // 영상 idx 조회
-    $r->addRoute('PATCH', '/watching-video', ['IndexController', 'changeWatchTime']); // 시청 시간 보내기
-    $r->addRoute('GET', '/watching-video', ['IndexController', 'getWatchingVideo']); // 시청중인 영상 조회
-    $r->addRoute('GET', '/history', ['IndexController', 'getHistory']); // 다 본 작품 조회하기
-    $r->addRoute('DELETE', '/history', ['IndexController', 'deleteHistory']); // 다 본 작품 항목 삭제하기
-    $r->addRoute('DELETE', '/watching-video', ['IndexController', 'deleteWatchingVideo']); // 이어보기 항목 삭제하기
+    $r->addRoute('GET', '/kakaopay', ['IndexController', 'kakaoPayClient']); // 카카오페이 - 클라이언트
+    $r->addRoute('POST', '/kakaopay', ['IndexController', 'kakaoPayServer']); // 카카오페이 - 서버
+
 
 
 
@@ -110,14 +123,14 @@ switch ($routeInfo[0]) {
                 $vars = $routeInfo[2];
                 require './controllers/JWTController.php';
                 break;
-//            case 'EventController':
-//                $handler = $routeInfo[1][1]; $vars = $routeInfo[2];
-//                require './controllers/EventController.php';
-//                break;
-//            case 'ProductController':
-//                $handler = $routeInfo[1][1]; $vars = $routeInfo[2];
-//                require './controllers/ProductController.php';
-//                break;
+            case 'UserController':
+                $handler = $routeInfo[1][1]; $vars = $routeInfo[2];
+                require './controllers/UserController.php';
+                break;
+            case 'VideoController':
+                $handler = $routeInfo[1][1]; $vars = $routeInfo[2];
+                require './controllers/VideoController.php';
+                break;
             case 'SearchController':
                 $handler = $routeInfo[1][1]; $vars = $routeInfo[2];
                 require './controllers/SearchController.php';

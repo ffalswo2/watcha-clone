@@ -58,7 +58,7 @@ try {
                     echo json_encode($res, JSON_NUMERIC_CHECK);
                     break;
                 } else {
-                    echo $genre,$country;
+//                    echo $genre,$country;
                     $res->result = searchVidByCategory($genre);
                     $res->isSuccess = TRUE;
                     $res->code = 100;

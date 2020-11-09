@@ -88,6 +88,16 @@ try {
                     break;
                 }
 
+                if (checkProfileHistory($profileIdxInToken,$videoIdx) and checkHistoryDeleted($profileIdxInToken,$videoIdx)=='N') {
+                    // history 테이블에 있고(이미 한번 다본 영화)
+                    playMovieAlreadyWatched($profileIdxInToken,$videoIdx); // history에서 지우고 watchingVideo로 다시가야함
+                    $res->isSuccess = TRUE;
+                    $res->code = 180;
+                    $res->message = "영화 재시청 성공";
+                    echo json_encode($res, JSON_NUMERIC_CHECK);
+                    break;
+                }
+
                 if (checkProfileVideoWatch($profileIdxInToken,$videoIdx)) {
                     $res->result = playMovieWithoutInsert($videoIdx)[0];
                     $res->isSuccess = TRUE;
@@ -96,6 +106,7 @@ try {
                     echo json_encode($res, JSON_NUMERIC_CHECK);
                     break;
                 }
+
 
                 $res->result = playMovie($profileIdxInToken,$videoIdx)[0];
                 $res->isSuccess = TRUE;
@@ -428,7 +439,7 @@ try {
                 break;
             }
 
-            if (checkUserAlreadyRate($profileIdxInToken,$videoIdx) and checkRateDeleted($profileIdxInToken,$videoIdx)=='N') { // 평가한 영상은 또 평가할 수 없음
+            if (checkUserAlreadyRate($profileIdxInToken,$videoIdx) and checkRateDeleted($profileIdxInToken,$videoIdx)==1) { // 평가한 영상은 또 평가할 수 없음
                 $res->isSuccess = FALSE;
                 $res->code = 300;
                 $res->message = "한번 평가한 영상은 더 이상 평가할 수 없습니다";
@@ -577,6 +588,7 @@ try {
                     echo json_encode($res, JSON_NUMERIC_CHECK);
                     break;
                 }
+
 
                 if (isMovie($videoIdx)-10 <= $watchTime/60 ) {
 

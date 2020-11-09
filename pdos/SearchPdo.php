@@ -4,7 +4,7 @@
 function searchVidByCategory($keyword)
 {
     $pdo = pdoSqlConnect();
-    $query = "select posterImage, videoName
+    $query = "select idx as videoIdx,posterImage, videoName
 from video
          left join genreVideo on genreVideo.videoIdx = video.idx
          left join genre on genreVideo.genreIdx = genre.idx
@@ -45,7 +45,7 @@ function searchVidByName($keyword)
 
         $pdo->beginTransaction();
 
-        $query1 = "select posterImage,videoName from video where replace(videoName, ' ', '') like concat('%',?,'%');";
+        $query1 = "select idx as videoIdx,posterImage,videoName from video where replace(videoName, ' ', '') like concat('%',?,'%');";
 
         $st = $pdo->prepare($query1);
         $st->execute([$keyword]);
@@ -90,7 +90,7 @@ function isValidCountryIdx($keyword) {
 function searchVidByCountry($keyword)
 {
     $pdo = pdoSqlConnect();
-    $query = "select posterImage, videoName
+    $query = "select idx as videoIdx,posterImage, videoName
 from video
          left join countryVideo on countryVideo.videoIdx = video.idx
          left join country on countryVideo.countryIdx = country.idx
@@ -110,7 +110,7 @@ where country.idx = ?;";
 
 function getPopularVideosByOrder() {
     $pdo = pdoSqlConnect();
-    $query = "select posterImage, videoName
+    $query = "select idx as videoIdx,posterImage, videoName
 from searchHistory
          left join video on keyword = videoName
 where keyword = videoName

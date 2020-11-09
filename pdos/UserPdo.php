@@ -47,7 +47,7 @@ function changeProfileInfo($profileImage,$profileName,$userIdxInToken) {
 
 function getFavVideos($profileIdxInToken) {
     $pdo = pdoSqlConnect();
-    $query = "select posterImage, videoName
+    $query = "select video.idx as videoIdx,posterImage, videoName
 from bannedVideo
          left join video on bannedVideo.videoIdx = video.idx
 where bannedVideo.profileIdx = ?
@@ -68,7 +68,7 @@ where bannedVideo.profileIdx = ?
 function getWatchingVideo($profileIdxInToken)
 {
     $pdo = pdoSqlConnect();
-    $query = "select posterImage,
+    $query = "select video.idx as videoIdx,posterImage,
        IF(episodeNum is null, videoName, concat(videoName, ':에피소드 ', max(episodeNum))) as watchingTitle,watchTime
 from watchingVideo
          left join video on watchingVideo.videoIdx = video.idx
@@ -91,7 +91,7 @@ where profile.idx = ? and watchingVideo.isDeleted = 'N' group by videoName;";
 function getHistory($profileIdxInToken)
 {
     $pdo = pdoSqlConnect();
-    $query = "select posterImage,videoName from video left join history on history.videoIdx = video.idx where history.profileIdx = ?;";
+    $query = "select idx as videoIdx,posterImage,videoName from video left join history on history.videoIdx = video.idx where history.profileIdx = ?;";
 
     $st = $pdo->prepare($query);
     //    $st->execute([$param,$param]);

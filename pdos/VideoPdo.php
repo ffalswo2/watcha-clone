@@ -105,6 +105,47 @@ where video.idx = ?;";
 
 }
 
+function playMovieAlreadyWatched($profileIdxInToken,$videoIdx) {
+    try {
+        $pdo = pdoSqlConnect();
+
+        $pdo->beginTransaction();
+
+        $query1 = "UPDATE history SET isDeleted = 'Y' where profileIdx = ? and videoIdx = ?;";
+
+        $st = $pdo->prepare($query1);
+        $st->execute([$profileIdxInToken,$videoIdx]);
+
+        $query2 = "INSERT INTO watchingVideo (profileIdx, videoIdx)
+VALUES (?, ?);";
+
+        $st = $pdo->prepare($query2);
+        $st->execute([$profileIdxInToken,$videoIdx]);
+        //    $st->execute();
+
+        $query3 = "select videoUrl,watchTime
+from video left join watchingVideo on watchingVideo.videoIdx = video.idx
+where video.idx = ?;";
+
+        $st = $pdo->prepare($query3);
+        $st->execute([$videoIdx]);
+        $st->setFetchMode(PDO::FETCH_ASSOC);
+        $res = $st->fetchAll();
+
+        $pdo->commit();
+
+        $st = null;
+        $pdo = null;
+
+        return $res;
+    }
+    catch (Exception $e) {
+        echo $e->getMessage();
+        $pdo->rollback();
+    }
+
+}
+
 function isValidEpisodeIdx($episodeIdx)
 {
     $pdo = pdoSqlConnect();
@@ -495,7 +536,23 @@ function checkUserAlreadyRate($profileIdx,$videoIdx) {
 
 function checkRateDeleted($profileIdx,$videoIdx) {
     $pdo = pdoSqlConnect();
-    $query = "SELECT isDeleted FROM rating WHERE profileIdx = ? and videoIdx = ?;";
+    $query = "SELECT count(*) as rateNum FROM rating WHERE profileIdx = ? and videoIdx = ? and isDeleted = 'N';";
+
+    $st = $pdo->prepare($query);
+    $st->execute([$profileIdx,$videoIdx]);
+    //    $st->execute();
+    $st->setFetchMode(PDO::FETCH_ASSOC);
+    $res = $st->fetchAll();
+
+    $st = null;
+    $pdo = null;
+
+    return $res[0]['rateNum'];
+}
+
+function checkHistoryDeleted($profileIdx,$videoIdx) {
+    $pdo = pdoSqlConnect();
+    $query = "SELECT isDeleted FROM history WHERE profileIdx = ? and videoIdx = ?;";
 
     $st = $pdo->prepare($query);
     $st->execute([$profileIdx,$videoIdx]);
@@ -545,6 +602,34 @@ function moveMovieToHistory($profileIdxInToken,$videoIdx) {
         $st->execute([$profileIdxInToken,$videoIdx]);
 
         $query2 = "INSERT INTO history (profileIdx,videoIdx) VALUES (?,?);";
+
+        $st = $pdo->prepare($query2);
+        $st->execute([$profileIdxInToken,$videoIdx]);
+
+        $pdo->commit();
+
+        $st = null;
+        $pdo = null;
+    }
+    catch (Exception $e) {
+        echo $e->getMessage();
+        $pdo->rollback();
+    }
+
+}
+
+function moveMovieToWatching($profileIdxInToken,$videoIdx) {
+    try {
+        $pdo = pdoSqlConnect();
+
+        $pdo->beginTransaction();
+
+        $query1 = "UPDATE history SET isDeleted = 'Y' where profileIdx = ? and videoIdx = ?;";
+
+        $st = $pdo->prepare($query1);
+        $st->execute([$profileIdxInToken,$videoIdx]);
+
+        $query2 = "INSERT INTO watchingVideo (profileIdx,videoIdx) VALUES (?,?);";
 
         $st = $pdo->prepare($query2);
         $st->execute([$profileIdxInToken,$videoIdx]);

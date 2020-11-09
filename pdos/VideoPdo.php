@@ -146,6 +146,48 @@ where video.idx = ?;";
 
 }
 
+function playDramaAlreadyWatched($profileIdxInToken,$videoIdx,$episodeIdx) {
+    try {
+        $pdo = pdoSqlConnect();
+
+        $pdo->beginTransaction();
+
+        $query1 = "UPDATE history SET isDeleted = 'Y' where profileIdx = ? and videoIdx = ?;";
+
+        $st = $pdo->prepare($query1);
+        $st->execute([$profileIdxInToken,$videoIdx]);
+
+        $query2 = "INSERT INTO watchingVideo (profileIdx, videoIdx, episodeIdx)
+VALUES (?, ?, ?);";
+
+        $st = $pdo->prepare($query2);
+        $st->execute([$profileIdxInToken,$videoIdx,$episodeIdx]);
+        //    $st->execute();
+
+        $query3 = "select episodeUrl, watchTime
+from episode
+         left join watchingVideo on watchingVideo.episodeIdx = episode.idx
+where episode.idx = ?;";
+
+        $st = $pdo->prepare($query3);
+        $st->execute([$episodeIdx]);
+        $st->setFetchMode(PDO::FETCH_ASSOC);
+        $res = $st->fetchAll();
+
+        $pdo->commit();
+
+        $st = null;
+        $pdo = null;
+
+        return $res;
+    }
+    catch (Exception $e) {
+        echo $e->getMessage();
+        $pdo->rollback();
+    }
+
+}
+
 function isValidEpisodeIdx($episodeIdx)
 {
     $pdo = pdoSqlConnect();
@@ -730,12 +772,12 @@ function changeDramaWatchTime($watchTime,$profileIdxInToken,$episodeIdx) {
 
 }
 
-function checkProfileHistory($profileIdxInToken,$value) {
+function checkProfileHistory($profileIdxInToken,$videoIdx) {
     $pdo = pdoSqlConnect();
     $query = "select exists(select profileIdx,videoIdx from history where profileIdx = ? and videoIdx = ?) as exist;";
 
     $st = $pdo->prepare($query);
-    $st->execute([$profileIdxInToken,$value]);
+    $st->execute([$profileIdxInToken,$videoIdx]);
     //    $st->execute();
     $st->setFetchMode(PDO::FETCH_ASSOC);
     $res = $st->fetchAll();

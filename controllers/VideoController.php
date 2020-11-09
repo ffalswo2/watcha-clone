@@ -156,6 +156,16 @@ try {
                 break;
             }
 
+            if (checkProfileHistory($profileIdxInToken,$videoIdx) and checkHistoryDeleted($profileIdxInToken,$videoIdx)=='N') {
+                // history 테이블에 있고(이미 한번 다본 영화 드라마)
+                playDramaAlreadyWatched($profileIdxInToken,$videoIdx,$episodeIdx); // history에서 지우고 watchingVideo로 다시가야함
+                $res->isSuccess = TRUE;
+                $res->code = 180;
+                $res->message = "드라마 재시청 성공";
+                echo json_encode($res, JSON_NUMERIC_CHECK);
+                break;
+            }
+
             if (checkProfileEpisodeWatch($profileIdxInToken,$episodeIdx)) {
                 $res->result = playDramaWithoutInsert($episodeIdx)[0];
                 $res->isSuccess = TRUE;

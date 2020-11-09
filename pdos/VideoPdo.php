@@ -374,7 +374,7 @@ where genre.idx in (select GROUP_CONCAT(genre.idx SEPARATOR ',') as genreIdx
                     where video.idx = ?) and video.idx not in (select idx from video where video.idx = ?);";
 
         $st = $pdo->prepare($query4);
-        $st->execute([$videoIdx]);
+        $st->execute([$videoIdx,$videoIdx]);
         $st->setFetchMode(PDO::FETCH_ASSOC);
         $res['similarContents'] = $st->fetchAll();
 

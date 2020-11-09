@@ -318,7 +318,7 @@ function getMovieInfo($videoIdx) {
 
         $pdo->beginTransaction();
 
-        $query1 = "select videoUrl,
+        $query1 = "select videoUrl,posterImage,
        round((select avg(rating) from rating where rating.videoIdx = video.idx and rating.isDeleted = 'N'),
              1)                                                                                               as ratingAvg,
        videoName,
@@ -398,7 +398,7 @@ function getDramaInfo($videoIdx) {
 
         $pdo->beginTransaction();
 
-        $query1 = "select videoUrl,
+        $query1 = "select videoUrl,posterImage,
        round((select avg(rating) from rating where rating.videoIdx = video.idx and rating.isDeleted = 'N'),
              1)                                                                                               as ratingAvg,
        videoName,

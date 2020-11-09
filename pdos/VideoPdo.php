@@ -363,7 +363,7 @@ group by videoName;";
         $st->setFetchMode(PDO::FETCH_ASSOC);
         $res['review'] = $st->fetchAll();
 
-        $query4 = "select posterImage, videoName
+        $query4 = "select video.idx as videoIdx,posterImage, videoName
 from video
          left join genreVideo on genreVideo.videoIdx = video.idx
          left join genre on genreVideo.genreIdx = genre.idx
@@ -371,7 +371,7 @@ where genre.idx in (select GROUP_CONCAT(genre.idx SEPARATOR ',') as genreIdx
                     from video
                              left join genreVideo on genreVideo.videoIdx = video.idx
                              left join genre on genreVideo.genreIdx = genre.idx
-                    where video.idx = ?);";
+                    where video.idx = ?) and video.idx not in (select idx from video where video.idx = ?);";
 
         $st = $pdo->prepare($query4);
         $st->execute([$videoIdx]);

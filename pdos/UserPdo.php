@@ -91,7 +91,7 @@ where profile.idx = ? and watchingVideo.isDeleted = 'N' group by videoName;";
 function getHistory($profileIdxInToken)
 {
     $pdo = pdoSqlConnect();
-    $query = "select idx as videoIdx,posterImage,videoName from video left join history on history.videoIdx = video.idx where history.profileIdx = ?;";
+    $query = "select video.idx as videoIdx,posterImage,videoName from video left join history on history.videoIdx = video.idx where history.profileIdx = ?;";
 
     $st = $pdo->prepare($query);
     //    $st->execute([$param,$param]);

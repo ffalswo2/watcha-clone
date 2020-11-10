@@ -324,6 +324,7 @@ function getMovieInfo($videoIdx) {
        videoName,
        case
            when ageGrade > 18 then concat('청불')
+           when ageGrade < 12 then concat('전체')
            else concat(ageGrade, '세') end                                                                     as ageGrade,
        case
            when video.time is null then concat('에피소드 ', (select count(*) from episode where episode.videoIdx = ?), '개')
@@ -443,7 +444,7 @@ group by videoName;";
         $st->setFetchMode(PDO::FETCH_ASSOC);
         $res['review'] = $st->fetchAll();
 
-        $query4 = "select idx as episodeIdx,episodeUrl, concat('에피소드 ',episodeNum) as episodeNum, episodeTitle,
+        $query4 = "select idx as episodeIdx,episodeThumbnail,episodeUrl, concat('에피소드 ',episodeNum) as episodeNum, episodeTitle,
        case when episodeTime > 60 then concat(episodeTime div 60, '시간', episodeTime % 60, '분')
            when episodeTime < 60 then concat(episodeTime, '분') end                        as episodeTime
 from episode

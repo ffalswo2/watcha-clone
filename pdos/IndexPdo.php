@@ -1169,7 +1169,20 @@ function checkMembership($userIdxInToken) {
     return $res[0]['exist'];
 }
 
+function getLoginFlag($userIdxInToken,$deviceId){
+    $pdo = pdoSqlConnect();
+    $query = "select loginFlag from maxLogin where userIdx = ? and deviceId = ?;";
 
+
+    $st = $pdo->prepare($query);
+    $st->execute([$userIdxInToken,$deviceId]);
+    $st->setFetchMode(PDO::FETCH_ASSOC);
+    $res = $st->fetchAll();
+
+    $st=null; $pdo = null;
+
+    return $res[0]['loginFlag'];
+}
 
 
 

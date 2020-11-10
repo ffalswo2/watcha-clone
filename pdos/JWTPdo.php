@@ -89,3 +89,58 @@ function addNaverUser($naverId,$email,$name,$profileImg) {
     }
 
 }
+
+function getLoginDeviceNum($userIdx){
+    $pdo = pdoSqlConnect();
+    $query = "select count(userIdx) as count from maxLogin where userIdx = ? and loginFlag = 'ON';";
+
+
+    $st = $pdo->prepare($query);
+    $st->execute([$userIdx]);
+    $st->setFetchMode(PDO::FETCH_ASSOC);
+    $res = $st->fetchAll();
+
+    $st=null; $pdo = null;
+
+    return $res[0]['count'];
+}
+
+function loginCutIn($userIdx,$deviceId,$jwt) {
+    try {
+        $pdo = pdoSqlConnect();
+
+        $pdo->beginTransaction();
+
+        $query1 = "update maxLogin set loginFlag = 'OFF' where createdAt = (select * from (select min(createdAt) from maxLogin where userIdx = ? and loginFlag = 'ON') as temp);";
+
+        $st = $pdo->prepare($query1);
+        $st->execute([$userIdx]);
+
+        $query2 = "insert into maxLogin (userIdx,deviceId,token) values (?,?,?);";
+
+        $st = $pdo->prepare($query2);
+        $st->execute([$userIdx,$deviceId,$jwt]);
+
+        $pdo->commit();
+
+        $st = null;
+        $pdo = null;
+    }
+    catch (Exception $e) {
+        echo $e->getMessage();
+        $pdo->rollback();
+    }
+
+}
+
+function addLoginLog($userIdx,$deviceId,$jwt) {
+    $pdo = pdoSqlConnect();
+    $query = "insert into maxLogin (userIdx,deviceId,token) values (?,?,?);";
+
+    $st = $pdo->prepare($query);
+    $st->execute([$userIdx,$deviceId,$jwt]);
+
+    $st = null;
+    $pdo = null;
+
+}

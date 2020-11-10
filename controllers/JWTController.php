@@ -79,6 +79,7 @@ try {
             }
 
             $accessToken = $req->accessToken;
+            $deviceId = $req->deviceId;
 
             if (is_numeric($accessToken)) {
                 $res->isSuccess = FALSE;
@@ -121,8 +122,19 @@ try {
                     $userIdx = getUserIdxByNaverId($naverId);  // JWTPdo.php 에 구현
                     $profileIdx = getProfileIdxByUserIdx($userIdx);
 
-                    $jwt = getJWT($userIdx,$profileIdx, JWT_SECRET_KEY); // function.php 에 구현
+                    $jwt = getJWT($userIdx,$profileIdx,$deviceId, JWT_SECRET_KEY); // function.php 에 구현
 
+                    if (getLoginDeviceNum($userIdx)==3) {
+                        loginCutIn($userIdx,$deviceId,$jwt);
+                        $res->result->jwt = $jwt;
+                        $res->isSuccess = TRUE;
+                        $res->code = 101;
+                        $res->message = "네이버 회원가입 후 로그인 성공(jwt 발급 성공)";
+                        echo json_encode($res, JSON_NUMERIC_CHECK);
+                        break;
+                    }
+
+                    addLoginLog($userIdx,$deviceId,$jwt); // eric
                     $res->result->jwt = $jwt;
                     $res->isSuccess = TRUE;
                     $res->code = 101;
@@ -136,8 +148,19 @@ try {
                 $userIdx = getUserIdxByNaverId($naverId);  // JWTPdo.php 에 구현
                 $profileIdx = getProfileIdxByUserIdx($userIdx);
 
-                $jwt = getJWT($userIdx,$profileIdx, JWT_SECRET_KEY); // function.php 에 구현
+                $jwt = getJWT($userIdx,$profileIdx,$deviceId, JWT_SECRET_KEY); // function.php 에 구현
 
+                if (getLoginDeviceNum($userIdx)==3) {
+                    loginCutIn($userIdx,$deviceId,$jwt);
+                    $res->result->jwt = $jwt;
+                    $res->isSuccess = TRUE;
+                    $res->code = 100;
+                    $res->message = "네이버 로그인 성공(jwt 발급 성공)";
+                    echo json_encode($res, JSON_NUMERIC_CHECK);
+                    break;
+                }
+
+                addLoginLog($userIdx,$deviceId,$jwt); // eric
                 $res->result->jwt = $jwt;
                 $res->isSuccess = TRUE;
                 $res->code = 100;

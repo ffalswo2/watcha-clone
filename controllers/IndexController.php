@@ -106,8 +106,18 @@ try {
             $jwt = $_SERVER['HTTP_X_ACCESS_TOKEN'];
             $userIdxInToken = getDataByJWToken($jwt,JWT_SECRET_KEY)->userIdx;
             $profileIdxInToken = getDataByJWToken($jwt,JWT_SECRET_KEY)->profileIdx;
+            $deviceId = getDataByJWToken($jwt,JWT_SECRET_KEY)->deviceId;
 
             if (!isValidJWT($jwt,JWT_SECRET_KEY)) {
+                $res->isSuccess = FALSE;
+                $res->code = 202;
+                $res->message = "유효하지 않은 토큰입니다";
+                echo json_encode($res, JSON_NUMERIC_CHECK);
+                addErrorLogs($errorLogs, $res, $req);
+                return;
+            }
+
+            if (getLoginFlag($userIdxInToken,$deviceId)=='OFF') {
                 $res->isSuccess = FALSE;
                 $res->code = 202;
                 $res->message = "유효하지 않은 토큰입니다";
@@ -159,12 +169,21 @@ try {
         case "kakaoPayServer":
             http_response_code(200);
 
-            http_response_code(200);
             $jwt = $_SERVER['HTTP_X_ACCESS_TOKEN'];
             $userIdxInToken = getDataByJWToken($jwt,JWT_SECRET_KEY)->userIdx;
             $profileIdxInToken = getDataByJWToken($jwt,JWT_SECRET_KEY)->profileIdx;
+            $deviceId = getDataByJWToken($jwt,JWT_SECRET_KEY)->deviceId;
 
             if (!isValidJWT($jwt,JWT_SECRET_KEY)) {
+                $res->isSuccess = FALSE;
+                $res->code = 202;
+                $res->message = "유효하지 않은 토큰입니다";
+                echo json_encode($res, JSON_NUMERIC_CHECK);
+                addErrorLogs($errorLogs, $res, $req);
+                return;
+            }
+
+            if (getLoginFlag($userIdxInToken,$deviceId)=='OFF') {
                 $res->isSuccess = FALSE;
                 $res->code = 202;
                 $res->message = "유효하지 않은 토큰입니다";

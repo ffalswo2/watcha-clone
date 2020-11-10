@@ -116,6 +116,14 @@ try {
                 return;
             }
 
+            if (checkMembership($userIdxInToken)) {
+                $res->isSuccess = FALSE;
+                $res->code = 260;
+                $res->message = "이미 베이직 이용권을 구매하신 회원입니다";
+                echo json_encode($res, JSON_NUMERIC_CHECK);
+                break;
+            }
+
             $url = 'https://kapi.kakao.com/v1/payment/ready';
             $adminKey = '765511f5ffff6f735aa340bfc0a3fa96';
             $header = array(

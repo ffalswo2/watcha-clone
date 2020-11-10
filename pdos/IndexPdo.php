@@ -1152,6 +1152,23 @@ function savePayment($userIdxInToken,$itemName) {
 
 }
 
+function checkMembership($userIdxInToken) {
+    $pdo = pdoSqlConnect();
+    $query = "select exists(select userIdx from membership where userIdx = ? and replace(membershipName,' ','') like '%베이직이용권%') as exist;
+";
+
+    $st = $pdo->prepare($query);
+    $st->execute([$userIdxInToken]);
+    //    $st->execute();
+    $st->setFetchMode(PDO::FETCH_ASSOC);
+    $res = $st->fetchAll();
+
+    $st = null;
+    $pdo = null;
+
+    return $res[0]['exist'];
+}
+
 
 
 

@@ -55,6 +55,7 @@ $dispatcher = FastRoute\simpleDispatcher(function (FastRoute\RouteCollector $r) 
     $r->addRoute('GET', '/watching-video', ['UserController', 'getWatchingVideo']); // 시청중인 영상 조회
     $r->addRoute('GET', '/history', ['UserController', 'getHistory']); // 다 본 작품 조회하기
     $r->addRoute('GET', '/videos', ['UserController', 'getVideos']); // 유저 기반 모든 영상 조회 (평가하기)
+    $r->addRoute('DELETE', '/membership', ['UserController', 'cancelMembership']); // 이용권 해지하기
 
     /* ******************   index   ****************** */
     $r->addRoute('GET', '/country', ['IndexController', 'getCountryIdx']); // 국가 idx 조회

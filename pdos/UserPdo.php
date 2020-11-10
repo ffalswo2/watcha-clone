@@ -136,6 +136,37 @@ where videoName not in (select videoName
     return $res;
 }
 
+function cancelMembership($userIdxInToken) {
+    $pdo = pdoSqlConnect();
+    $query = "UPDATE membership
+SET membershipName = null
+where userIdx = ?;";
+
+    $st = $pdo->prepare($query);
+    $st->execute([$userIdxInToken]);
+
+    $st = null;
+    $pdo = null;
+
+}
+
+function getMembershipName($userIdxInToken)
+{
+    $pdo = pdoSqlConnect();
+    $query = "select membershipName from membership where userIdx = ?;";
+
+    $st = $pdo->prepare($query);
+    $st->execute([$userIdxInToken]);
+    //    $st->execute();
+    $st->setFetchMode(PDO::FETCH_ASSOC);
+    $res = $st->fetchAll();
+
+    $st = null;
+    $pdo = null;
+
+    return $res[0]['membershipName'];
+}
+
 // CREATE
 //    function addMaintenance($message){
 //        $pdo = pdoSqlConnect();

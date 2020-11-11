@@ -352,6 +352,68 @@ try {
             echo json_encode($res, JSON_NUMERIC_CHECK);
             break;
 
+        case "getRecommendVid":
+            http_response_code(200);
+
+            $jwt = $_SERVER['HTTP_X_ACCESS_TOKEN'];
+            $userIdxInToken = getDataByJWToken($jwt,JWT_SECRET_KEY)->userIdx;
+            $profileIdxInToken = getDataByJWToken($jwt,JWT_SECRET_KEY)->profileIdx;
+            $deviceId = getDataByJWToken($jwt,JWT_SECRET_KEY)->deviceId;
+
+            if (!isValidJWT($jwt,JWT_SECRET_KEY)) {
+                $res->isSuccess = FALSE;
+                $res->code = 202;
+                $res->message = "유효하지 않은 토큰입니다";
+                echo json_encode($res, JSON_NUMERIC_CHECK);
+                addErrorLogs($errorLogs, $res, $req);
+                return;
+            }
+
+            if (checkLoginFlag($userIdxInToken,$deviceId)=='OFF') {
+                $res->isSuccess = FALSE;
+                $res->code = 202;
+                $res->message = "유효하지 않은 토큰입니다";
+                echo json_encode($res, JSON_NUMERIC_CHECK);
+                addErrorLogs($errorLogs, $res, $req);
+                return;
+            }
+
+            $favoriteGenre = getLikeGenre($profileIdxInToken);
+            $totalGenre = getTotalGenre($profileIdxInToken);
+
+            $arr = array(
+                array()
+            );
+
+            for ($i=0;$i<count($favoriteGenre);$i++) {
+                $arr[$i][0] = $favoriteGenre[$i]['genreIdx'];
+                $arr[$i][1] = round($favoriteGenre[$i]['count']/$totalGenre*100,0);
+            }
+
+            for ($i=0;$i<count($arr);$i++) {
+//                $ball = mt_rand(1,100);
+                $ball = mt_rand(1,100);
+
+                if ($ball <= $arr[$i][1]) {
+                    $genreId = $arr[$i][0];
+                    if (isset($genreId)) {
+                        $recommendVid = getRecommendVid($genreId)[mt_rand(0,count(getRecommendVid($genreId))-1)];
+                        pushAlarm($userIdxInToken,$recommendVid['videoName']);
+                        $res->result = $recommendVid;
+                        $res->isSuccess = TRUE;
+                        $res->code = 100;
+                        $res->message = "사용자 추천 영상 불러오기 완료";
+                        echo json_encode($res, JSON_NUMERIC_CHECK);
+                        break;
+                    } else {
+                        continue;
+                    }
+
+                } else {
+                    continue;
+                }
+
+            }
 
 
 

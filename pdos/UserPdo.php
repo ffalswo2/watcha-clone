@@ -182,6 +182,99 @@ function checkLoginFlag($userIdxInToken,$deviceId){
     return $res[0]['loginFlag'];
 }
 
+function getLikeGenre($profileIdxInToken)
+{
+    $pdo = pdoSqlConnect();
+    $query = "select a.genreIdx,a.genreTitle,count(a.genreTitle) as count from (select genre.idx as genreIdx, genreTitle
+from bannedVideo
+         left join video on bannedVideo.videoIdx = video.idx
+         left join genreVideo on genreVideo.videoIdx = video.idx
+         left join genre on genreVideo.genreIdx = genre.idx
+where bannedVideo.profileIdx = ?
+  and bannedVideo.status = 'L'
+union all
+select genre.idx as genreIdx, genreTitle
+from rating
+         left join video on rating.videoIdx = video.idx
+         left join genreVideo on genreVideo.videoIdx = video.idx
+         left join genre on genreVideo.genreIdx = genre.idx
+where rating.profileIdx = ?
+  and rating.isDeleted = 'N' and rating.rating >= 3) a group by a.genreTitle order by count DESC;";
+
+    $st = $pdo->prepare($query);
+    //    $st->execute([$param,$param]);
+    $st->execute([$profileIdxInToken,$profileIdxInToken]);
+    $st->setFetchMode(PDO::FETCH_ASSOC);
+    $res = $st->fetchAll();
+
+    $st = null;
+    $pdo = null;
+
+    return $res;
+}
+
+function getTotalGenre($profileIdxInToken)
+{
+    $pdo = pdoSqlConnect();
+    $query = "select count(a.genreIdx) as total from (select genre.idx as genreIdx, genreTitle
+from bannedVideo
+         left join video on bannedVideo.videoIdx = video.idx
+         left join genreVideo on genreVideo.videoIdx = video.idx
+         left join genre on genreVideo.genreIdx = genre.idx
+where bannedVideo.profileIdx = ?
+  and bannedVideo.status = 'L'
+union all
+select genre.idx as genreIdx, genreTitle
+from rating
+         left join video on rating.videoIdx = video.idx
+         left join genreVideo on genreVideo.videoIdx = video.idx
+         left join genre on genreVideo.genreIdx = genre.idx
+where rating.profileIdx = ?
+  and rating.isDeleted = 'N' and rating.rating >= 3)a;";
+
+    $st = $pdo->prepare($query);
+    //    $st->execute([$param,$param]);
+    $st->execute([$profileIdxInToken,$profileIdxInToken]);
+    $st->setFetchMode(PDO::FETCH_ASSOC);
+    $res = $st->fetchAll();
+
+    $st = null;
+    $pdo = null;
+
+    return $res[0]['total'];
+}
+
+function getRecommendVid($genreId){
+    $pdo = pdoSqlConnect();
+    $query = "select posterImage, videoName
+from video
+         left join genreVideo on genreVideo.videoIdx = video.idx
+         left join genre on genreVideo.genreIdx = genre.idx
+where genre.idx = ?;";
+
+
+    $st = $pdo->prepare($query);
+    $st->execute([$genreId]);
+    $st->setFetchMode(PDO::FETCH_ASSOC);
+    $res = $st->fetchAll();
+
+    $st=null; $pdo = null;
+
+    return $res;
+}
+
+function pushAlarm($userIdxInToken,$videoName) {
+    $pdo = pdoSqlConnect();
+    $query = "insert into pushAlarm(userIdx, `comment`)  values (?,concat('오늘은',?,'시청하는게 어떠세요?'));";
+
+    $st = $pdo->prepare($query);
+    $st->execute([$userIdxInToken,$videoName]);
+
+    $st = null;
+    $pdo = null;
+
+}
+
 // CREATE
 //    function addMaintenance($message){
 //        $pdo = pdoSqlConnect();

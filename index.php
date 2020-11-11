@@ -44,9 +44,9 @@ $dispatcher = FastRoute\simpleDispatcher(function (FastRoute\RouteCollector $r) 
     $r->addRoute('PATCH', '/video/{video-idx}/good', ['VideoController', 'likeVideo']); // 특정 영상 보고싶어요 추가/삭제 o
     $r->addRoute('POST', '/video/{video-idx}/rate', ['VideoController', 'rateWithStar']); // 별점 평가하기
     $r->addRoute('DELETE', '/video/{video-idx}/rate', ['VideoController', 'deleteRate']); // 별점 평가하기 취소하기
-    $r->addRoute('PATCH', '/watching-video', ['VideoController', 'changeWatchTime']); // 시청 시간 보내기
-    $r->addRoute('DELETE', '/history', ['VideoController', 'deleteHistory']); // 다 본 작품 항목 삭제하기
-    $r->addRoute('DELETE', '/watching-video', ['VideoController', 'deleteWatchingVideo']); // 이어보기 항목 삭제하기
+    $r->addRoute('POST', '/watching-video', ['VideoController', 'changeWatchTime']); // 시청 시간 보내기
+    $r->addRoute('PATCH', '/history', ['VideoController', 'deleteHistory']); // 다 본 작품 항목 삭제하기
+    $r->addRoute('PATCH', '/watching-video', ['VideoController', 'deleteWatchingVideo']); // 이어보기 항목 삭제하기
 
     /* ******************   user   ****************** */
     $r->addRoute('GET', '/profile', ['UserController', 'getProfile']); // 유저 프로필 조회
@@ -56,6 +56,7 @@ $dispatcher = FastRoute\simpleDispatcher(function (FastRoute\RouteCollector $r) 
     $r->addRoute('GET', '/history', ['UserController', 'getHistory']); // 다 본 작품 조회하기
     $r->addRoute('GET', '/videos', ['UserController', 'getVideos']); // 유저 기반 모든 영상 조회 (평가하기)
     $r->addRoute('DELETE', '/membership', ['UserController', 'cancelMembership']); // 이용권 해지하기
+    $r->addRoute('GET', '/video/recommend', ['UserController', 'getRecommendVid']); // 사용자 추천 영상 조회
 
     /* ******************   index   ****************** */
     $r->addRoute('GET', '/country', ['IndexController', 'getCountryIdx']); // 국가 idx 조회

@@ -55,7 +55,7 @@ function playMovieWithoutInsert($videoIdx)
     $pdo = pdoSqlConnect();
     $query = "select videoUrl,watchTime
 from video left join watchingVideo on watchingVideo.videoIdx = video.idx
-where video.idx = ?;";
+where video.idx = ? and watchingVideo.isDeleted = 'N';";
 
     $st = $pdo->prepare($query);
     //    $st->execute([$param,$param]);
@@ -83,7 +83,7 @@ VALUES (?, ?);";
 
         $query2 = "select videoUrl,watchTime
 from video left join watchingVideo on watchingVideo.videoIdx = video.idx
-where video.idx = ?;";
+where video.idx = ? and watchingVideo.isDeleted = 'N';";
 
         $st = $pdo->prepare($query2);
         $st->execute([$videoIdx]);
@@ -125,7 +125,7 @@ VALUES (?, ?);";
 
         $query3 = "select videoUrl,watchTime
 from video left join watchingVideo on watchingVideo.videoIdx = video.idx
-where video.idx = ?;";
+where video.idx = ? and watchingVideo.isDeleted = 'N';";
 
         $st = $pdo->prepare($query3);
         $st->execute([$videoIdx]);
@@ -167,7 +167,7 @@ VALUES (?, ?, ?);";
         $query3 = "select episodeUrl, watchTime
 from episode
          left join watchingVideo on watchingVideo.episodeIdx = episode.idx
-where episode.idx = ?;";
+where episode.idx = ? and watchingVideo.isDeleted = 'N';";
 
         $st = $pdo->prepare($query3);
         $st->execute([$episodeIdx]);
@@ -245,7 +245,7 @@ function playDramaWithoutInsert($episodeIdx)
     $query = "select episodeUrl, watchTime
 from episode
          left join watchingVideo on watchingVideo.episodeIdx = episode.idx
-where episode.idx = ?;";
+where episode.idx = ? and watchingVideo.isDeleted = 'N';";
 
     $st = $pdo->prepare($query);
     //    $st->execute([$param,$param]);
@@ -274,7 +274,7 @@ VALUES (?,?,?);";
         $query2 = "select episodeUrl, watchTime
 from episode
          left join watchingVideo on watchingVideo.episodeIdx = episode.idx
-where episode.idx = ?;";
+where episode.idx = ? and watchingVideo.isDeleted = 'N';";
 
         $st = $pdo->prepare($query2);
         $st->execute([$episodeIdx]);
@@ -763,7 +763,7 @@ function moveDramaToHistory($profileIdxInToken,$videoIdx,$episodeIdx) {
 
 function changeDramaWatchTime($watchTime,$profileIdxInToken,$episodeIdx) {
     $pdo = pdoSqlConnect();
-    $query = "UPDATE watchingVideo SET watchTime = ? where profileIdx = ? and episodeIdx = ?;";
+    $query = "UPDATE watchingVideo SET watchTime = ? where profileIdx = ? and episodeIdx = ? and isDeleted = 'N';";
 
     $st = $pdo->prepare($query);
     $st->execute([$watchTime,$profileIdxInToken,$episodeIdx]);
@@ -775,7 +775,7 @@ function changeDramaWatchTime($watchTime,$profileIdxInToken,$episodeIdx) {
 
 function checkProfileHistory($profileIdxInToken,$videoIdx) {
     $pdo = pdoSqlConnect();
-    $query = "select exists(select profileIdx,videoIdx from history where profileIdx = ? and videoIdx = ?) as exist;";
+    $query = "select exists(select * from history where profileIdx = ? and videoIdx = ? and isDeleted = 'N') as exist;";
 
     $st = $pdo->prepare($query);
     $st->execute([$profileIdxInToken,$videoIdx]);

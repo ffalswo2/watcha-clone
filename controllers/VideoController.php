@@ -166,9 +166,9 @@ try {
                 break;
             }
 
-            if (checkProfileHistory($profileIdxInToken,$videoIdx) and checkHistoryDeleted($profileIdxInToken,$videoIdx)=='N') {
+            if (checkProfileHistory($profileIdxInToken,$videoIdx)) {
                 // history 테이블에 있고(이미 한번 다본 영화 드라마)
-                playDramaAlreadyWatched($profileIdxInToken,$videoIdx,$episodeIdx); // history에서 지우고 watchingVideo로 다시가야함
+                $res->result = playDramaAlreadyWatched($profileIdxInToken,$videoIdx,$episodeIdx)[0]; // history에서 지우고 watchingVideo로 다시가야함
                 $res->isSuccess = TRUE;
                 $res->code = 180;
                 $res->message = "드라마 재시청 성공";

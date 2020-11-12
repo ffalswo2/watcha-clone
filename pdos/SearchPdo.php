@@ -110,11 +110,11 @@ where country.idx = ?;";
 
 function getPopularVideosByOrder() {
     $pdo = pdoSqlConnect();
-    $query = "select video.idx as videoIdx,posterImage, videoName
+    $query = "select posterImage, videoName
 from searchHistory
-         left join video on keyword = videoName
-where keyword = videoName
-group by keyword
+         left join video on replace(keyword, ' ', '') = replace(videoName,' ','')
+where replace(keyword, ' ', '') like concat('%',replace(videoName,' ',''),'%')
+group by videoName
 order by count(keyword) DESC
 limit 6;";
 

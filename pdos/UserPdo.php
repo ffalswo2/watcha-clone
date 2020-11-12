@@ -3,11 +3,12 @@
 //READ
 function getProfile($userIdxInToken) {
     $pdo = pdoSqlConnect();
-    $query = "select profile.idx as profileIdx, name, profileImage,membershipName,membership.expireDate as memberShipExpireDate
+    $query = "select profile.idx as profileIdx, name, profileImage, membership.membershipName as membershipName, membership.expireDate as memberShipExpireDate
 from profile
          left join user on profile.userIdx = user.idx
-         left join membership on profile.userIdx = user.idx
-where profile.userIdx = ? group by name;";
+         left join membership on membership.userIdx = user.idx
+where profile.userIdx = ?
+group by name;";
 
     $st = $pdo->prepare($query);
     $st->execute([$userIdxInToken]);
@@ -266,7 +267,7 @@ where genre.idx = ?;";
 
 function pushAlarm($userIdxInToken,$videoName) {
     $pdo = pdoSqlConnect();
-    $query = "insert into pushAlarm(userIdx, `comment`)  values (?,concat('오늘은',?,'시청하는게 어떠세요?'));";
+    $query = "insert into pushAlarm(userIdx, `comment`)  values (?,concat('오늘은 ',?,' 시청하는게 어떠세요?'));";
 
     $st = $pdo->prepare($query);
     $st->execute([$userIdxInToken,$videoName]);

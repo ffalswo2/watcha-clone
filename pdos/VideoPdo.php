@@ -803,7 +803,7 @@ function deleteHistory($videoIdx,$profileIdxInToken) {
 
 function deleteWatchingVideo($videoIdx,$profileIdxInToken) {
     $pdo = pdoSqlConnect();
-    $query = "UPDATE watchingVideo SET isDeleted = 'Y' where profileIdx = ? and videoIdx = ?;";
+    $query = "UPDATE watchingVideo SET isDeleted = 'Y' where videoIdx = ? and profileIdx = ?;";
 
     $st = $pdo->prepare($query);
     $st->execute([$videoIdx,$profileIdxInToken]);

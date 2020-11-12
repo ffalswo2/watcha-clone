@@ -297,6 +297,7 @@ try {
             $resArr['ratingNum'] = $ratingNum;
 
             for ($i=0;$i<count($videos);$i++) {
+                $resArr['videos'][$i]['videoIdx'] = $videos[$i]['videoIdx'];
                 $resArr['videos'][$i]['posterImage'] = $videos[$i]['posterImage'];
                 $resArr['videos'][$i]['videoName'] = $videos[$i]['videoName'];
                 $resArr['videos'][$i]['year'] = $videos[$i]['year'];

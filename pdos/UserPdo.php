@@ -109,6 +109,7 @@ function getVideos($profileIdx)
 {
     $pdo = pdoSqlConnect();
     $query = "select (select count(*) from rating where rating.profileIdx = ? and rating.isDeleted = 'N') as ratingNum,
+       video.idx as videoIdx,
        posterImage,
        videoName,
        year
